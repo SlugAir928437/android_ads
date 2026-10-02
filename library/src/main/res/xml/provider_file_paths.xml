@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  米盟（mimo）与章鱼（sdk-ad-multi / com.yoyo.ad）都使用 androidx.core.content.FileProvider，
+  且各自在 AndroidManifest 中声明了同名的 provider，合并后只能保留一份 paths 配置，
+  故此处取两者的并集：yoyo 的 yo_file_path 为全路径集合，再加上 mimo 需要的下载目录。
+-->
+<paths>
+    <external-files-path
+        name="files_root" path="mimoDownload" />
+    <root-path
+        name="root_dir" path="." />
+    <external-path
+        name="external_storage_root" path="." />
+    <external-path
+        name="external_files" path="." />
+    <external-cache-path
+        name="external_cache" path="." />
+    <external-files-path
+        name="external_private" path="." />
+    <external-media-path
+        name="media_dir" path="." />
+    <files-path
+        name="internal_files" path="." />
+    <cache-path
+        name="app_cache" path="." />
+</paths>

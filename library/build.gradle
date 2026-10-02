@@ -1,0 +1,130 @@
+plugins {
+    alias(libs.plugins.android.library)
+}
+
+android {
+    namespace 'com.FreshingAir.Ad.Aggregation'
+    compileSdk {
+        version = release(37)
+    }
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 37
+
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a'
+        }
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // 广告 SDK 的混淆规则随 AAR 一起传递给使用方
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        // myapp 包内生成的混乱代码在非静态内部类里声明了 static 嵌套类，
+        // 该语法需要 Java 16+（JEP 395），故语言级别取 17
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        aidl true
+        buildConfig true
+    }
+
+    packaging {
+        resources {
+            excludes += [
+                    'META-INF/DEPENDENCIES',
+                    'META-INF/LICENSE',
+                    'META-INF/LICENSE.txt',
+                    'META-INF/NOTICE',
+                    'META-INF/NOTICE.txt',
+            ]
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-Xmaxerrs', '50000']
+}
+
+dependencies {
+    // androidx 基础
+    api libs.androidx.core.ktx
+    api libs.androidx.core.splashscreen
+    api libs.androidx.appcompat
+    api libs.androidx.cardview
+    api libs.androidx.constraintlayout
+    api libs.androidx.fragment.ktx
+    api libs.androidx.recyclerview
+    api libs.androidx.swiperefreshlayout
+    api libs.androidx.viewpager2
+    api libs.androidx.lifecycle.runtime.ktx
+    api libs.androidx.lifecycle.viewmodel.ktx
+    api libs.androidx.lifecycle.livedata.ktx
+    api libs.kotlinx.coroutines.android
+
+    // 广告平台 SDK（maven 依赖）
+    api libs.material
+    api libs.play.services.ads
+    api libs.ads.lite
+    api libs.glide
+
+    // 网络与工具
+    api libs.okhttp
+    api libs.gson
+    api libs.retrofit
+    api libs.retrofit.converter.gson
+
+    // 阿里 Tanx（原工程声明为 com.shenshi:ad-tanx-adapter，该坐标无版本且已不可解析，
+    // 此处改用 Maven Central 上的官方 Tanx SDK，代码包名 com.alimm.tanx.* 保持一致）
+    api libs.tanx.core.sdk
+    api libs.tanx.ui.sdk
+
+    // InMobi（海外）—— 只有 Banner / 插屏 / 原生，没有开屏格式，本工程只接信息流原生
+    api libs.inmobi.ads
+
+    // 广告平台 SDK（本地 AAR，由 settings.gradle 中的 flatDir 仓库解析）
+    api(name: 'Baidu_MobAds_SDK-release_v9.422', ext: 'aar')            // 百度
+    api(name: 'ad-beizi-5.2.2.0', ext: 'aar')                           // 倍孜
+    api(name: 'open_ad_sdk_7.2.2.1', ext: 'aar')                        // 穿山甲
+    api(name: 'GDTSDK.unionNormal.4.662.1532', ext: 'aar')              // 广点通
+    api(name: 'kssdk-ad-4.9.20.5-publishRelease-1910680d9f', ext: 'aar')// 快手
+    api(name: 'wind-common-1.8.7', ext: 'aar')                          // Sigmob
+    api(name: 'wind-sdk-4.24.9', ext: 'aar')
+    api(name: 'mimo-ad-sdk-5.3.8.27', ext: 'aar')                       // 米盟
+    api(name: 'ms-sdk_3.0.0.0_release', ext: 'aar')                     // 美数
+    api(name: 'octopus_ad_sdk_2.5.11.17', ext: 'aar')                   // 章鱼
+    api(name: 'dirichlet_ad_4.2.0.8', ext: 'aar')
+    api(name: 'oaid_sdk_1.0.25', ext: 'aar')                            // OAID
+    api(name: 'jad_yun_sdk_jingdong_2.6.32_androidx', ext: 'aar')       // 京东
+    api(name: 'QiMingSDK-2.2.1.1', ext: 'aar')                          // 启明
+    api(name: 'ad-openset-sdk-6.5.4.9', ext: 'aar')                     // OSET
+    api(name: 'adalliance_adn_sdk.3.11.3', ext: 'aar')                  // 阿里 adalliance ADN
+    api(name: 'sdk-ad-multi-1.7.2.1', ext: 'aar')
+
+    // 友盟+ U-AppWin 广告联盟（common / asms 为必选基础组件，adk、uyumao 随官方 SDK 包一并提供）
+    api(name: 'umeng-common-9.9.10', ext: 'aar')
+    api(name: 'umeng-asms-v1.8.7', ext: 'aar')
+    api(name: 'umeng-adk-v1.1.0', ext: 'aar')
+    api(name: 'uyumao-1.1.4', ext: 'aar')
+    api(name: 'umeng-union-3.7.1', ext: 'aar')
+
+    // 新浪移动联盟（只有信息流，SDK 为普通 jar，依赖使用方在清单中声明其 Browser Activity）
+    api(name: 'sax-min-sdk', ext: 'jar')
+
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+
+    implementation libs.mpandroidchart
+}

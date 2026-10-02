@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 主按钮背景：圆角 + 按下态（纯 framework shape，不依赖 Material） -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/brand_primary_dark" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/panel_stroke" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/brand_primary" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>

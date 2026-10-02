@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" >
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"
+        tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"
+        tools:ignore="RequestInstallPackagesPolicy" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
+        tools:ignore="BackgroundLocationPolicy" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <permission      android:name="${applicationId}.openadsdk.permission.TT_PANGOLIN"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="${applicationId}.openadsdk.permission.TT_PANGOLIN" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+
+    <uses-sdk tools:overrideLibrary="com.octopus.ad" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:supportsRtl="true"
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true"
+        android:hardwareAccelerated="true"
+        tools:replace="android:allowBackup"
+        tools:ignore="ExtraText" >
+
+        <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+        <!--百度SDK-->
+        <activity
+            android:name="com.baidu.mobads.sdk.api.AppActivity"
+            android:configChanges="screenSize|keyboard|keyboardHidden|orientation"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:allowBackup="true"
+            tools:replace="android:allowBackup"/>
+        <!-- 如果使用激励视频/全屏视频功能，需要主动在AndroidManifest.xml里面声明MobRewardVideoActivity -->
+        <activity
+            android:name="com.baidu.mobads.sdk.api.MobRewardVideoActivity"
+            android:configChanges="screenSize|orientation|keyboardHidden|uiMode"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:allowBackup="true"
+            tools:replace="android:allowBackup,android:configChanges" />  <!-- 修改此行 -->
+        <provider
+            android:name="com.baidu.mobads.sdk.api.BdFileProvider"
+            android:authorities="${applicationId}.bd.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/bd_file_paths" />
+        </provider>
+        <!--百度SDK End-->
+
+        <!--广点通SDK--><!-- 声明SDK所需要的组件 -->
+        <service
+            android:name="com.qq.e.comm.DownloadService"
+            android:exported="false" />
+        <!-- 请开发者注意字母的大小写，ADActivity，而不是AdActivity -->
+        <activity
+            android:name="com.qq.e.ads.ADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:multiprocess="true"
+            tools:replace="android:configChanges"/>
+        <activity
+            android:name="com.qq.e.ads.PortraitADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:multiprocess="true"
+            tools:replace="android:configChanges"/>
+        <activity
+            android:name="com.qq.e.ads.LandscapeADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:screenOrientation="sensorLandscape"
+            android:multiprocess="true"
+            tools:replace="android:configChanges"/>
+        <!-- 用于激励视频可选广告的竖屏透明背景activity -->
+        <activity
+            android:name="com.qq.e.ads.RewardvideoPortraitADActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:theme="@android:style/Theme.Light.NoTitleBar"
+            android:multiprocess="true">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <!-- 用于激励视频可选广告的横屏透明背景activity -->
+        <activity
+            android:name="com.qq.e.ads.RewardvideoLandscapeADActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:theme="@android:style/Theme.Light.NoTitleBar"
+            android:multiprocess="true">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity
+            android:name="com.qq.e.ads.DialogActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:multiprocess="true"/>
+        <!--广点通SDK End-->
+        <!--米盟SDK-->
+        <!-- 章鱼（sdk-ad-multi）的 AAR 清单里同样声明了 androidx.core.content.FileProvider，
+             只是 authority 为 ${applicationId}.fileProvider（大写 P）、paths 为 @xml/yo_file_path。
+             两者按 provider 名称合并，这里用 tools:replace 接管冲突属性，并保留两方的 authority 与路径。 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider;${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_file_paths"
+                tools:replace="android:resource" />
+        </provider>
+        <!--米盟SDK End-->
+        <!--美数SDK-->
+        <provider
+            android:name="com.meishu.sdk.core.service.MeishuFileProvider"
+            android:authorities="${applicationId}.MeishuFileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/ms_file_path" />
+        </provider>
+        <!--美数SDK End-->
+
+        <!--新浪移动联盟：SDK 是普通 jar，自身没有清单，这两个 Activity 必须由宿主声明，
+            否则点击广告跳转时会因找不到 Activity 而崩溃-->
+        <activity
+            android:name="cn.com.sina.mobileads.common.SinaAdBrowser"
+            android:exported="false"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity
+            android:name="cn.com.sina.mobileads.feedad.SinaFeedAdBrowser"
+            android:exported="false"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <!--新浪移动联盟 End-->
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider;${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_file_paths"
+                tools:replace="android:resource" />
+        </provider>
+
+    </application>
+
+</manifest>

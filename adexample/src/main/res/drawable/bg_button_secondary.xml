@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 次级按钮背景：白底描边 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/ad_placeholder" />
+            <stroke android:width="1dp" android:color="@color/brand_primary" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/panel_background" />
+            <stroke android:width="1dp" android:color="@color/panel_stroke" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>

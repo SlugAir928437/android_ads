@@ -1,0 +1,4 @@
+ProtectTime: 2026-09-27 08:45:10
+Function: 控制流混淆8.0
+Version: 3.1.50
+Attention: 仅用于个人代码保护，禁止用于非法用途！

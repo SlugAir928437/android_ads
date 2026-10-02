@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      AppCompatActivity 要求使用 AppCompat 主题，因此这里以 Theme.AppCompat.Light.NoActionBar 为父主题，
+      不使用 Material Components（MaterialDesign）主题，示例界面全部由 androidx 基础控件构成。
+    -->
+    <style name="Theme.JunkCodeLibrary" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorPrimaryDark">@color/brand_primary_dark</item>
+        <item name="colorAccent">@color/brand_accent</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_hint</item>
+        <item name="android:windowBackground">@color/page_background</item>
+        <item name="android:statusBarColor">@color/brand_primary_dark</item>
+    </style>
+
+</resources>

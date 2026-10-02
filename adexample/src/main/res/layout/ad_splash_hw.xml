@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  华为开屏专用容器。
+  华为 SDK 要求 SplashView 必须由布局文件声明（不能 new），因此单独提供该布局，
+  由 SplashActivity 在目标平台为 HW 时 inflate 后加入开屏容器。
+-->
+<com.huawei.hms.ads.splash.SplashView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/hwSplashView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />

@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">AdExample</string>
+
+    <!-- 开屏页 -->
+    <string name="splash_loading">广告加载中…</string>
+    <string name="splash_platform">目标平台：%1$s</string>
+    <string name="splash_skip">跳过</string>
+
+    <!-- 主页 -->
+    <string name="main_tip">选择平台后发起请求。开屏广告会进入独立页面，广告结束（或超时）后自动回到本页，可在下方日志查看回调时序。</string>
+    <string name="main_platform_label">目标平台</string>
+    <string name="main_splash_title">开屏广告</string>
+    <string name="main_splash_hint">容器为普通 FrameLayout；华为（HW）必须使用 SplashView 容器，示例会自动切换，无需手动处理。</string>
+    <string name="main_splash_action">重新进入开屏页</string>
+    <string name="main_feed_title">信息流广告</string>
+    <string name="main_feed_hint">容器宽度需占满屏幕，部分平台会按容器宽度请求素材。</string>
+    <string name="main_feed_action">加载信息流广告</string>
+    <string name="main_feed_clear">清空</string>
+    <string name="main_video_title">视频广告（激励视频）</string>
+    <string name="main_video_hint">加载成功后自动全屏播放；看完发放奖励，关闭或失败也会回调到日志区。</string>
+    <string name="main_video_action">加载视频广告</string>
+    <string name="main_log_title">运行日志</string>
+    <string name="main_log_clear">清空日志</string>
+</resources>

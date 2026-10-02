@@ -1,0 +1,52 @@
+pluginManagement {
+    repositories {
+        // 镜像源，加速依赖下载
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://repo.huaweicloud.com/repository/maven/' }
+        maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://developer.huawei.com/repo/' }
+        maven { url 'https://developer.hihonor.com/repo' }
+    }
+}
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven { url 'https://developer.hihonor.com/repo' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://repo.huaweicloud.com/repository/maven/' }
+        maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+
+        google()
+        mavenCentral()
+
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://developer.huawei.com/repo/' }
+
+        // 本地 AAR 仓库（library/libs 下的广告 SDK）
+        // 库模块不允许直接依赖本地 .aar 文件，故通过 flatDir 以坐标方式解析
+        flatDir {
+            dirs "$rootDir/library/libs"
+        }
+    }
+}
+
+rootProject.name = "ADAggregation"
+include ':library'
+include ':adexample'

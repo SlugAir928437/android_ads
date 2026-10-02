@@ -1,0 +1,79 @@
+[versions]
+agp = "9.2.1"
+aliyunLogAndroidSdk = "2.6.14"
+coreKtx = "1.17.0"
+junit = "4.13.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleRuntimeKtx = "2.10.0"
+kotlin = "2.2.10"
+
+# 广告 SDK 相关依赖版本（来源：android_ads 工程）
+material = "1.13.0"
+mpandroidchart = "v3.1.0"
+playServicesAds = "25.0.0"
+okhttp = "5.3.2"
+gson = "2.13.2"
+cardview = "1.0.0"
+adsLite = "13.4.83.301"
+glide = "5.0.5"
+appcompat = "1.7.1"
+fragment = "1.8.5"
+viewpager2 = "1.1.0"
+recyclerview = "1.3.2"
+swiperefreshlayout = "1.1.0"
+constraintlayout = "2.1.4"
+retrofit = "2.11.0"
+coroutines = "1.8.1"
+splashscreen = "1.0.1"
+tanx = "3.7.37"
+inmobi = "10.1.4"
+activityCompose = "1.13.0"
+composeBom = "2026.02.01"
+
+[libraries]
+aliyun-log-android-sdk = { module = "com.aliyun.openservices:aliyun-log-android-sdk", version.ref = "aliyunLogAndroidSdk" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleRuntimeKtx" }
+
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+androidx-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
+play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+ads-lite = { group = "com.huawei.hms", name = "ads-lite", version.ref = "adsLite" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+tanx-core-sdk = { group = "com.tanx", name = "TanxCoreSDK", version.ref = "tanx" }
+tanx-ui-sdk = { group = "com.tanx", name = "TanxUISDK", version.ref = "tanx" }
+inmobi-ads = { module = "com.inmobi.monetization:inmobi-ads", version.ref = "inmobi" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
