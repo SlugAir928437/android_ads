@@ -434,7 +434,7 @@ App 内置大量环境检测逻辑，实时判断当前设备是不是审核 / �
 
 事已至此，先听：
 
-<video src="https://github.com/user-attachments/files/32967706/default.mp3" controls>你的浏览器不支持 <code>video</code> 标签。</video>
+<video src=".github/music.mp3" controls>你的浏览器不支持 <code>video</code> 标签。</video>
 
 既然这种App已经遍地开花，这个仓库就秉承着“打不过就加入”的理念，让我们在自己的App里面也加入广告，丰富应用形式。😈
 
