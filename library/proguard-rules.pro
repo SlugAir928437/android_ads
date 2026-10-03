@@ -122,26 +122,6 @@
 -dontwarn com.octopus.**
 -keep class com.octopus.** {*;}
 
-# ============================== YouAreLoser 包保活规则 ==============================
-# YouAreLoser 包内全部为垃圾代码载体类，要求 R8 一个都不许裁剪 / 改名 / 优化。
--keep class YouAreLoser.** { *; }
--keepclassmembers class YouAreLoser.** { *; }
--keep interface YouAreLoser.** { *; }
--keep public class * extends YouAreLoser.** { *; }
--keep public class * implements YouAreLoser.** { *; }
--dontwarn YouAreLoser.**
-# ==============================================================================================
-
-# ============================== @MTProtector 标记注解保留规则 ==============================
-# bin.mt.annotations.MTProtector 是 CLASS 保留策略的标记注解（@Target(TYPE, METHOD, CONSTRUCTOR)）。
-# 实测：只靠 -keepattributes *Annotation* 不够，注解类本身一旦被判为无用类型，R8 会把
-# 注解使用点一起清掉，最终产物里一个 @MTProtector 都搜不到。所以这里必须显式保留注解类。
--keep class bin.mt.annotations.** { *; }
-# 如果希望「被 @MTProtector 标记的类」也整块保留（不裁剪、不优化），再放开下面这行，
-# 代价是这些类的体积会原样进包：
-#-keep @bin.mt.annotations.MTProtector class * { *; }
-# ==============================================================================================
-
 # ============================== InMobi（海外）保活规则 ==============================
 # InMobi 的实现类大量依赖反射与回调接口，官方要求整包保留。
 -dontwarn com.inmobi.**
@@ -168,4 +148,14 @@
 -keep class cn.com.sina.** { *; }
 -keep interface cn.com.sina.** { *; }
 -keepclassmembers class cn.com.sina.** { *; }
+# ==============================================================================================
+
+# ============================== 爱奇艺联盟（iQiYi）保活规则 ==============================
+# 爱奇艺联盟 SDK 依赖反射与 JSON 反序列化，官方要求整包保留（以 AAR 内 proguard.txt 为准）。
+-dontwarn com.mcto.sspsdk.**
+-keep class com.mcto.sspsdk.** { *; }
+-keep interface com.mcto.sspsdk.** { *; }
+-keepclassmembers class com.mcto.sspsdk.** { *; }
+# AAR 内部对微信开放平台（小程序落地页）为可选依赖，未接入时不参与打包
+-dontwarn com.tencent.mm.**
 # ==============================================================================================

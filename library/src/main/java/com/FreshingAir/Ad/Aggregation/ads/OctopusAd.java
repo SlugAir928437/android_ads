@@ -1,9 +1,12 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.FreshingAir.Ad.Aggregation.AdPlatform;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 import com.FreshingAir.Ad.Aggregation.Init;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
 import com.FreshingAir.Ad.Aggregation.R;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.FreshingAir.Ad.Aggregation.SplashAdCallback;
@@ -16,6 +19,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.octopus.ad.BannerAd;
+import com.octopus.ad.BannerAdListener;
+import com.octopus.ad.InterstitialAd;
+import com.octopus.ad.InterstitialAdListener;
 import com.octopus.ad.NativeAd;
 import com.octopus.ad.NativeAdListener;
 import com.octopus.ad.NativeAdResponse;
@@ -37,7 +44,7 @@ import com.octopus.ad.model.ComplianceInfo;
 
 import java.util.ArrayList;
 
-@MTProtector
+
 public class OctopusAd {
 
     private static final String TAG = "章鱼移动 SDK";
@@ -70,7 +77,7 @@ public class OctopusAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdCacheLoaded(boolean isSuccess) {
 //                Log.i(TAG, "onAdCacheLoaded: " + isSuccess);
                 Log.i(TAG,"广告加载状态"+isSuccess);
@@ -93,7 +100,7 @@ public class OctopusAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdClosed() {
 
                 Log.i(TAG,"广告关闭");
@@ -101,13 +108,13 @@ public class OctopusAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdClicked() {
                 Log.i(TAG,"广告被点击");
             }
 
             @Override
-            @MTProtector
+            
             public void onAdTick(long millisUnitFinished) {
             }
         };
@@ -115,12 +122,12 @@ public class OctopusAd {
         mSplashAd.openAdInNativeBrowser(true);
     }
     private static NativeAd mNativeAd;
-    @MTProtector
+    
     public static void OctopusNativeAd(Context context,String slotId,ViewGroup adContainer) {
         mNativeAd = new NativeAd(context, slotId, new NativeAdListener() {
 
             @Override
-            @MTProtector
+            
             public void onAdFailed(int errorCode) {
                 Log.d(TAG, "onAdFailed:" + errorCode);
             }
@@ -284,7 +291,7 @@ public class OctopusAd {
      * @param context 需要是 Activity（激励视频展示依赖 Activity）
      * @param slotId  激励视频广告位 ID
      */
-    @MTProtector
+    
     public static void OctopusRewardVideoAd(Context context, String slotId) {
         Activity activity = context instanceof Activity ? (Activity) context : null;
         if (activity == null) {
@@ -294,7 +301,7 @@ public class OctopusAd {
         final RewardVideoAd[] holder = new RewardVideoAd[1];
         RewardVideoAd rewardVideoAd = new RewardVideoAd(context, slotId, new RewardVideoAdListener() {
             @Override
-            @MTProtector
+            
             public void onRewarded(RewardItem rewardItem) {
                 Log.i(TAG, "激励视频发放奖励");
                 RewardVideoAdCallback.onRewardAdRewarded(context,
@@ -303,28 +310,28 @@ public class OctopusAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardVideoAdClosed() {
                 Log.i(TAG, "激励视频关闭");
                 RewardVideoAdCallback.onRewardAdClose(context);
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardVideoAdShown() {
                 Log.i(TAG, "激励视频开始播放");
                 RewardVideoAdCallback.onRewardAdShow(context);
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardVideoAdFailedToLoad(int errorCode) {
                 Log.e(TAG, "激励视频加载失败，错误码：" + errorCode);
                 RewardVideoAdCallback.onRewardAdError(context, errorCode, null);
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardVideoAdLoaded() {
                 Log.i(TAG, "激励视频加载成功");
                 RewardVideoAdCallback.onRewardAdLoaded(context);
@@ -348,6 +355,118 @@ public class OctopusAd {
         holder[0] = rewardVideoAd;
         rewardVideoAd.openAdInNativeBrowser(true);
         rewardVideoAd.loadAd();
+    }
+
+    /**
+     * 加载并展示章鱼插屏广告（加载成功后自动展示）。
+     *
+     * @param activity 展示广告的页面
+     * @param adId     插屏广告位 ID
+     */
+    
+    public static void OctopusInterstitialAd(Activity activity, String adId) {
+        if (activity == null || adId == null || adId.trim().isEmpty()) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "参数非法（Activity/广告位不能为空）");
+            return;
+        }
+        final InterstitialAd[] holder = new InterstitialAd[1];
+        InterstitialAd interstitialAd = new InterstitialAd(activity, adId, new InterstitialAdListener() {
+            @Override
+            public void onAdLoaded() {
+                Log.i(TAG, "插屏广告加载成功");
+                InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                if (holder[0] != null) {
+                    holder[0].show(activity);
+                }
+            }
+
+            @Override
+            
+            public void onAdCacheLoaded(boolean isSuccess) {
+            }
+
+            @Override
+            
+            public void onAdShown() {
+                Log.i(TAG, "插屏广告展示");
+                InterstitialAdCallback.onInterstitialAdShow(activity);
+            }
+
+            @Override
+            
+            public void onAdFailedToLoad(int errorCode) {
+                Log.e(TAG, "插屏广告加载失败，错误码：" + errorCode);
+                InterstitialAdCallback.onInterstitialAdError(activity, errorCode, null);
+            }
+
+            @Override
+            
+            public void onAdClosed() {
+                Log.i(TAG, "插屏广告关闭");
+                InterstitialAdCallback.onInterstitialAdClose(activity);
+            }
+
+            @Override
+            public void onAdClicked() {
+            }
+        });
+        holder[0] = interstitialAd;
+        interstitialAd.loadAd();
+    }
+
+    /**
+     * 加载并展示章鱼插屏广告（广告位为 long 时的便捷重载）。
+     */
+    public static void OctopusInterstitialAd(Activity activity, long adId) {
+        OctopusInterstitialAd(activity, String.valueOf(adId));
+    }
+
+    /**
+     * 加载并展示章鱼 Banner 广告。
+     *
+     * @param activity  展示广告的页面
+     * @param adId      Banner 广告位 ID
+     * @param container 承载广告 View 的容器
+     */
+    
+    public static void OctopusBannerAd(Activity activity, String adId, @NonNull ViewGroup container) {
+        if (activity == null || container == null || adId == null || adId.trim().isEmpty()) {
+            BannerAdCallback.onBannerAdError(activity, -1, "参数非法（Activity/容器/广告位不能为空）");
+            return;
+        }
+        container.removeAllViews();
+        new BannerAd(activity, adId, new BannerAdListener() {
+            @Override
+            public void onAdLoaded(NativeAdResponse response) {
+                Log.i(TAG, "Banner广告加载成功");
+                if (response == null) {
+                    BannerAdCallback.onBannerAdError(activity, -1, "Banner广告数据为空");
+                    return;
+                }
+                View view = response.getNativeView();
+                if (view == null) {
+                    BannerAdCallback.onBannerAdError(activity, -1, "Banner广告视图为空");
+                    return;
+                }
+                container.removeAllViews();
+                container.addView(view);
+                BannerAdCallback.onBannerAdLoaded(activity, container);
+            }
+
+            @Override
+            
+            public void onAdFailed(int errorCode) {
+                Log.e(TAG, "Banner广告加载失败，错误码：" + errorCode);
+                BannerAdCallback.onBannerAdError(activity, errorCode, null);
+            }
+        }).loadAd();
+    }
+
+    /**
+     * 加载并展示章鱼 Banner 广告（广告位为 long 时的便捷重载）。
+     */
+    public static void OctopusBannerAd(Activity activity, long adId, @NonNull ViewGroup container) {
+        OctopusBannerAd(activity, String.valueOf(adId), container);
     }
 
 }

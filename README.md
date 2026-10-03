@@ -46,12 +46,14 @@
     - [5. 开屏广告接入](#5-开屏广告接入)
     - [6. 信息流广告接入](#6-信息流广告接入)
     - [7. 视频广告（激励视频）接入](#7-视频广告激励视频接入)
-    - [8. API 一览](#8-api-一览)
-    - [9. 支持的广告平台](#9-支持的广告平台)
-    - [10. 广告位 ID 配置](#10-广告位-id-配置)
-    - [11. 混淆规则](#11-混淆规则)
-    - [12. 注意事项](#12-注意事项)
-    - [13. 构建与产物](#13-构建与产物)
+    - [8. 插屏广告接入](#8-插屏广告接入)
+    - [9. Banner 广告接入](#9-banner-广告接入)
+    - [10. API 一览](#10-api-一览)
+    - [11. 支持的广告平台](#11-支持的广告平台)
+    - [12. 广告位 ID 配置](#12-广告位-id-配置)
+    - [13. 混淆规则](#13-混淆规则)
+    - [14. 注意事项](#14-注意事项)
+    - [15. 构建与产物](#15-构建与产物)
 
 ---
 
@@ -434,10 +436,10 @@ App 内置大量环境检测逻辑，实时判断当前设备是不是审核 / �
 
 [事已至此，先听：](.github/music.mp3)
 
-既然这种App已经遍地开花，这个仓库就秉承着“打不过就加入”的理念，让我们在自己的App里面也加入广告，丰富应用形式。😈
+既然这种App已经遍地开花，这个仓库秉承着“打不过就加入”的理念，让我们在自己的App里面也加入广告，丰富应用形式。😈
 
-`library` 模块把 19 家广告平台的 SDK 收敛成统一入口（`AdPlatform` 枚举 + `loadAdByType`），
-使用方只需要选择平台、传入广告容器，即可完成开屏广告、信息流广告与视频广告（激励视频）的加载，无需逐个平台对接。
+`library` 模块把 20 家广告平台的 SDK 收敛成统一入口（`AdPlatform` 枚举 + `loadAdByType`），
+使用方只需要选择平台、传入广告容器，即可完成开屏广告、信息流广告、插屏广告、Banner（横幅）广告与视频广告（激励视频）的加载，无需逐个平台对接。
 
 | 模块 | 说明 |
 | --- | --- |
@@ -451,8 +453,10 @@ ADAggregation/
 │   ├── src/main/java/com/FreshingAir/Ad/Aggregation/
 │   │   ├── AdPlatform.java       平台枚举
 │   │   ├── Init.java             各平台 SDK 初始化状态表
-│   │   ├── loadAdByType.java     统一加载入口（开屏 / 信息流 / 视频广告）
+│   │   ├── loadAdByType.java     统一加载入口（开屏 / 信息流 / 插屏 / Banner / 视频广告）
 │   │   ├── SplashAdCallback.kt   SDK 内部回调出口（开屏）
+│   │   ├── InterstitialAdCallback.kt  SDK 内部回调出口（插屏）
+│   │   ├── BannerAdCallback.kt   SDK 内部回调出口（Banner）
 │   │   ├── RewardVideoAdCallback.kt  SDK 内部回调出口（视频广告）
 │   │   ├── LocalAdBridge.kt      回调桥接，使用方在此接管广告结果
 │   │   ├── ads/                  各平台实现
@@ -533,7 +537,7 @@ dependencies {
 
 1. 把 `library/libs/` 下的全部广告平台 AAR 一并拷入使用方 `libs/`，并配置 `flatDir`；
 2. 手动补齐 maven 依赖（material、play-services-ads、ads-lite、glide、okhttp、gson、retrofit、Tanx 等）；
-3. 自行拷贝混淆规则（见 [11. 混淆规则](#11-混淆规则)）。
+3. 自行拷贝混淆规则（见 [13. 混淆规则](#13-混淆规则)）。
 
 依赖较多时，建议把 AAR 发布到私有 Maven 仓库生成 POM，而不是直接 `files()` 引用。
 
@@ -743,7 +747,7 @@ loadAdByType.loadRewardVideoAd(activity, platform[, rewardAdId])
 
 #### 7.4 释放
 
-页面销毁时清空回调，避免 SDK 持有已销毁页面的引用（`clear()` 会同时清空开屏与视频广告回调）：
+页面销毁时清空回调，避免 SDK 持有已销毁页面的引用（`clear()` 会同时清空开屏、视频广告、插屏与 Banner 回调）：
 
 ```kotlin
 override fun onDestroy() {
@@ -754,7 +758,111 @@ override fun onDestroy() {
 
 ---
 
-### 8. API 一览
+### 8. 插屏广告接入
+
+插屏广告（Interstitial）加载成功后由 SDK 自动全屏展示，使用方只需注册回调、发起请求。
+
+#### 8.1 注册回调
+
+```kotlin
+LocalAdBridge.onInterstitialAdLoaded = { AdLog.append("插屏广告：加载成功") }
+LocalAdBridge.onInterstitialAdShow = { AdLog.append("插屏广告：开始展示") }
+LocalAdBridge.onInterstitialAdClose = { AdLog.append("插屏广告：关闭") }
+LocalAdBridge.onInterstitialAdError = { _, code, msg ->
+    AdLog.append("插屏广告：失败 code=$code msg=$msg")
+}
+```
+
+Java 写法（Kotlin 函数类型返回 `Unit`，需要显式返回）：
+
+```java
+LocalAdBridge.setOnInterstitialAdLoaded(context -> {
+    Log.i("Ad", "插屏广告加载成功");
+    return kotlin.Unit.INSTANCE;
+});
+LocalAdBridge.setOnInterstitialAdError((context, code, msg) -> {
+    Log.e("Ad", "插屏广告失败 " + code + " / " + msg);
+    return kotlin.Unit.INSTANCE;
+});
+```
+
+#### 8.2 加载广告
+
+```java
+// activity：展示广告的页面（插屏全屏展示依赖 Activity）
+// 使用 utils/Id.java 中的示例广告位
+loadAdByType.loadInterstitialAd(activity, AdPlatform.CSJ);
+
+// 传入自己的插屏广告位 ID（传 null / 空串同样回退到示例值）
+loadAdByType.loadInterstitialAd(activity, AdPlatform.CSJ, "你的插屏广告位ID");
+```
+
+#### 8.3 完整流程
+
+```
+注册 LocalAdBridge 插屏回调
+      │
+      ▼
+loadAdByType.loadInterstitialAd(activity, platform[, interstitialAdId])
+      │
+      ├─ onInterstitialAdLoaded → 广告已就绪（多数平台随即自动展示）
+      ├─ onInterstitialAdShow   → 开始展示
+      ├─ onInterstitialAdClose  → 广告关闭
+      └─ onInterstitialAdError  → 加载 / 展示失败
+```
+
+> 阿里 Tanx、新浪移动联盟的 SDK 未提供插屏接口，对它们调用 `loadInterstitialAd` 会直接回调
+> `onInterstitialAdError`；倍孜、启明、米盟、京东、友盟的插屏广告位需在各自后台创建后传入。
+
+---
+
+### 9. Banner 广告接入
+
+Banner（横幅）广告会把广告 View 渲染进使用方传入的容器，使用方只需提供容器、注册回调。
+
+#### 9.1 注册回调
+
+```kotlin
+LocalAdBridge.onBannerAdLoaded = { _, container ->
+    // 广告 View 已由 SDK 加入 container，可在此调整容器高度
+    AdLog.append("Banner 广告：渲染完成，容器子 View=${container.childCount}")
+}
+LocalAdBridge.onBannerAdError = { _, code, msg ->
+    AdLog.append("Banner 广告：失败 code=$code msg=$msg")
+}
+```
+
+#### 9.2 加载广告
+
+```java
+// bannerAdContainer：Banner 容器（FrameLayout / LinearLayout 均可），广告 View 由 SDK 自行加入
+// 使用 utils/Id.java 中的示例广告位
+loadAdByType.loadBannerAd(activity, bannerAdContainer, AdPlatform.GDT);
+
+// 传入自己的 Banner 广告位 ID（传 null / 空串同样回退到示例值）
+loadAdByType.loadBannerAd(activity, bannerAdContainer, AdPlatform.GDT, "你的Banner广告位ID");
+```
+
+#### 9.3 完整流程
+
+```
+注册 LocalAdBridge Banner 回调
+      │
+      ▼
+loadAdByType.loadBannerAd(activity, container, platform[, bannerAdId])
+      │
+      ├─ onBannerAdLoaded → 广告 View 已加入容器
+      └─ onBannerAdError  → 加载 / 渲染失败
+```
+
+> 百度、Sigmob、倍孜、阿里 Tanx、新浪移动联盟的 SDK 未提供公开的 Banner 接口，对它们调用
+> `loadBannerAd` 会直接回调 `onBannerAdError`。
+> 友盟的 Banner 走「原生横幅」，与信息流一致地用 `UMNativeLayout` 渲染。
+> 快手、Taptap、InMobi 的广告位为 `long`，传入非数字字符串时同样回退到示例值。
+
+---
+
+### 10. API 一览
 
 #### `loadAdByType`
 
@@ -769,9 +877,13 @@ override fun onDestroy() {
 | `loadFeedAd(Activity, ViewGroup, AdPlatform, String feedAdId)` | 加载信息流广告并传入自定义广告位 ID |
 | `loadRewardVideoAd(Activity, AdPlatform)` | 加载视频广告（激励视频），使用示例广告位 |
 | `loadRewardVideoAd(Activity, AdPlatform, String rewardAdId)` | 加载视频广告并传入自定义广告位 ID |
+| `loadInterstitialAd(Activity, AdPlatform)` | 加载插屏广告，使用示例广告位；加载成功后自动展示 |
+| `loadInterstitialAd(Activity, AdPlatform, String interstitialAdId)` | 加载插屏广告并传入自定义广告位 ID |
+| `loadBannerAd(Activity, ViewGroup, AdPlatform)` | 加载 Banner（横幅）广告，使用示例广告位；广告 View 由 SDK 加入容器 |
+| `loadBannerAd(Activity, ViewGroup, AdPlatform, String bannerAdId)` | 加载 Banner 广告并传入自定义广告位 ID |
 
 > 传入的 ID 为 `null` 或空串时一律回退到 `utils/Id.java` 的示例值；
-> 快手、Taptap 的广告位 ID 为 `long`，传入非数字字符串时同样回退到示例值。
+> 快手、Taptap、InMobi 的广告位 ID 为 `long`，传入非数字字符串时同样回退到示例值。
 
 #### `LocalAdBridge`
 
@@ -784,8 +896,16 @@ override fun onDestroy() {
 | `onRewardVideoAdRewarded: ((Context, String, Int) -> Unit)?` | 视频广告发放奖励回调（激励名称、数量） |
 | `onRewardVideoAdClose: ((Context) -> Unit)?` | 视频广告关闭回调 |
 | `onRewardVideoAdError: ((Context, Int, String) -> Unit)?` | 视频广告加载 / 播放失败回调（错误码、错误信息） |
-| `clear()` | 清空开屏与视频广告的全部回调 |
+| `onInterstitialAdLoaded: ((Context) -> Unit)?` | 插屏加载成功回调 |
+| `onInterstitialAdShow: ((Context) -> Unit)?` | 插屏开始展示回调 |
+| `onInterstitialAdClose: ((Context) -> Unit)?` | 插屏关闭回调 |
+| `onInterstitialAdError: ((Context, Int, String) -> Unit)?` | 插屏加载 / 展示失败回调（错误码、错误信息） |
+| `onBannerAdLoaded: ((Context, ViewGroup) -> Unit)?` | Banner 渲染完成回调（广告 View 已加入容器） |
+| `onBannerAdError: ((Context, Int, String) -> Unit)?` | Banner 加载 / 渲染失败回调（错误码、错误信息） |
+| `clear()` | 清空开屏、视频广告、插屏与 Banner 的全部回调 |
 | `clearRewardVideoAd()` | 仅清空视频广告（激励视频）的回调 |
+| `clearInterstitialAd()` | 仅清空插屏广告的回调 |
+| `clearBannerAd()` | 仅清空 Banner 广告的回调 |
 
 #### `Init`
 
@@ -804,45 +924,60 @@ SDK 内部使用，使用方一般不需要直接调用。各平台实现在激�
 `onRewardAdLoaded` / `onRewardAdShow` / `onRewardAdRewarded` / `onRewardAdClose` / `onRewardAdError`，
 再由 `LocalAdBridge` 转发给页面。
 
+#### `InterstitialAdCallback`
+
+SDK 内部使用，使用方一般不需要直接调用。各平台实现在插屏的生命周期节点回调
+`onInterstitialAdLoaded` / `onInterstitialAdShow` / `onInterstitialAdClose` / `onInterstitialAdError`，
+再由 `LocalAdBridge` 转发给页面。
+
+#### `BannerAdCallback`
+
+SDK 内部使用，使用方一般不需要直接调用。各平台实现在 Banner 渲染完成、把广告 View 加入容器后回调
+`onBannerAdLoaded`，加载 / 渲染失败时回调 `onBannerAdError`，再由 `LocalAdBridge` 转发给页面。
+
 ---
 
-### 9. 支持的广告平台
+### 11. 支持的广告平台
 
-| 平台 | 枚举值 | 开屏（竖屏） | 开屏（横屏） | 信息流 | 视频广告 |
-| --- | --- | :---: | :---: | :---: | :---: |
-| 穿山甲 | `CSJ` | ✓ | | ✓ | ✓ |
-| 广点通 | `GDT` | ✓ | | ✓ | ✓ |
-| 百度 | `BAIDU` | ✓ | | ✓ | ✓ |
-| 快手 | `KS` | ✓ | | ✓ | ✓ |
-| Sigmob | `SIGMOB` | ✓ | | ✓ | ✓ |
-| 米盟 | `MIMO` | ✓ | ✓ | | ✓ |
-| 美数 | `MS` | ✓ | | ✓ | ✓ |
-| 章鱼 | `OCTOPUS` | ✓ | | ✓ | ✓ |
-| 京东 | `JD` | ✓ | | | |
-| Taptap | `TAPTAP` | ✓ | ✓ | ✓ | ✓ |
-| OSET | `OSET` | ✓ | | | ✓ |
-| 启明 | `QIMING` | ✓ | | | ✓ |
-| 华为 | `HW` | ✓ | | | ✓ |
-| 倍孜 | `BEIZI` | ✓ | | | ✓ |
-| AdMob | `ADMOB` | ✓ | | | ✓ |
-| 阿里 Tanx | `TANX` | ✓ | | | |
-| InMobi | `INMOBI` | | | ✓ | |
-| 友盟+ U-AppWin | `UMENG` | ✓ | | ✓ | ✓ |
-| 新浪移动联盟 | `SINA` | | | ✓ | |
+| 平台 | 枚举值 | 开屏（竖屏） | 开屏（横屏） | 信息流 | 插屏 | Banner | 视频广告 |
+| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| 穿山甲 | `CSJ` | ✓ | | ✓ | ✓ | ✓ | ✓ |
+| 优量汇（广点通） | `GDT` | ✓ | | ✓ | ✓ | ✓ | ✓ |
+| 百度 | `BAIDU` | ✓ | | ✓ | ✓ | | ✓ |
+| 快手 | `KS` | ✓ | | ✓ | ✓ | ✓ | ✓ |
+| Sigmob | `SIGMOB` | ✓ | | ✓ | ✓ | | ✓ |
+| 米盟 | `MIMO` | ✓ | ✓ | | ✓ | ✓ | ✓ |
+| 美数 | `MS` | ✓ | | ✓ | ✓ | ✓ | ✓ |
+| 章鱼 | `OCTOPUS` | ✓ | | ✓ | ✓ | ✓ | ✓ |
+| 京东 | `JD` | ✓ | | | ✓ | ✓ | |
+| Taptap | `TAPTAP` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| OSET | `OSET` | ✓ | | | ✓ | ✓ | ✓ |
+| 启明 | `QIMING` | ✓ | | | ✓ | ✓ | ✓ |
+| 华为 | `HW` | ✓ | | | ✓ | ✓ | ✓ |
+| 倍孜 | `BEIZI` | ✓ | | | ✓ | | ✓ |
+| AdMob | `ADMOB` | ✓ | | | ✓ | ✓ | ✓ |
+| 阿里 Tanx | `TANX` | ✓ | | | | | |
+| InMobi | `INMOBI` | | | ✓ | ✓ | ✓ | |
+| 友盟+ U-AppWin | `UMENG` | ✓ | | ✓ | ✓ | ✓ | ✓ |
+| 新浪移动联盟 | `SINA` | | | ✓ | | | |
+| 爱奇艺联盟 | `QIYI` | ✓ | | ✓ | ✓ | ✓ | ✓ |
 
 > - 「视频广告」列为激励视频（Rewarded Video）。京东、阿里 Tanx、InMobi、新浪移动联盟未提供激励视频格式，对它们调用 `loadRewardVideoAd` 会回调 `onRewardVideoAdError`。
 > - 米盟（`MIMO`）的视频广告仅在小米设备可用，非小米设备会直接回调错误。
+> - 「插屏」列为插屏广告（Interstitial），「Banner」列为横幅广告。阿里 Tanx、新浪移动联盟两种都不提供；百度、Sigmob、倍孜不提供 Banner。
 
 > - 竖屏未覆盖的平台或方向不匹配时，`loadSplashAd` 会直接触发 `onSplashAdFinished`，页面应正常进入主页。
 > - `getAdPlatform(String)` 未处理 `TANX`，使用字符串转换时请直接使用枚举。
 > - 华为开屏的容器必须是 `SplashView`，SDK 内部会做强制类型转换。
 > - InMobi（`INMOBI`）为海外平台，SDK 只提供 Banner / 插屏 / 原生三种格式，**没有开屏格式**，因此只支持信息流；对 `INMOBI` 调用 `loadSplashAd` 会直接走 `onSplashAdFinished`。
 > - 新浪移动联盟（`SINA`）同样只有信息流一种形式，且 SDK 为普通 jar：`library` 清单已代为声明其 `SinaAdBrowser` / `SinaFeedAdBrowser` 两个 Activity，无需使用方重复声明。
+> - 爱奇艺联盟（`QIYI`）为模板渲染模式，开屏 / 信息流 / Banner / 插屏 / 激励视频齐全，信息流与 Banner 共用同一套 `loadBannerAd` 请求接口、仅模板样式不同。SDK 的 AAR 自带清单已声明全部广告 Activity、`QyFileProvider`（`${applicationId}.qy.fileprovider`）与模拟器检测 Service，**无需使用方重复声明**；初始化必须在主线程调用，且 `QyCustomMade#getOaid()` 为必传项（缺失会明显影响广告转化效果）。
 > - 友盟+ U-AppWin（`UMENG`）开屏由 SDK 自行渲染进传入的容器，与倍孜的实现一致：先回调 `onSplashAdLoaded`，再由 `onDismissed` / `onError` 回调 `onSplashAdFinished`。
+> - 优量汇（`GDT`）即腾讯广告联盟，也就是广点通，是同一平台、同一套 SDK（包名 `com.qq.e`，本地 AAR 为 `GDTSDK.unionNormal.*.aar`）。因此表中以「优量汇（广点通）」列示，**不存在两个独立平台**，接入时使用 `AdPlatform.GDT` / `GDTAd` / `Id.GDTId` 即可。
 
 ---
 
-### 10. 广告位 ID 配置
+### 12. 广告位 ID 配置
 
 所有示例广告位集中在 `library/src/main/java/com/FreshingAir/Ad/Aggregation/utils/Id.java`，
 **当前全部为各开放平台提供的测试 ID，上线前必须替换为正式广告位**，否则会产生无效曝光。
@@ -855,33 +990,43 @@ SDK 内部使用，使用方一般不需要直接调用。各平台实现在激�
 
 | 平台 | 内部类 | 关键字段 |
 | --- | --- | --- |
-| 穿山甲 | `CsjId` | `APP_ID`、`SPLASH_ID`、`NATIVE_RECYCLERVIEW_ID`、`REWARD_ID` |
-| 广点通 | `GDTId` | `APP_ID`、`SPLASH_ID`、`NATIVE_EXPRESS_ID_PICTURE_VIDEO`、`REWARD_VIDEO_AD_ID_SUPPORT_H` |
-| 百度 | `BaiduId` | `APP_ID`、`SPLASH_ID`、`NATIVE_SIMPLE_ID`、`REWARD_ID` |
-| 快手 | `KsId` | `APP_ID`、`SPLASH_ID`、`FEED_ID`、`REWARD_ID` |
-| Sigmob | `SigmobId` | `APP_ID`、`APP_KEY`、`SPLASH_ID`、`FEED_ID`、`REWARD_ID` |
-| 米盟 | `MimoId` | `SPLASH_ID`、`REWARD_ID`（需在米盟后台创建） |
-| 美数 | `MSId` | `APP_ID`、`SPLASH_ID`、`FEED_ID`、`REWARD_ID` |
-| 章鱼 | `OctopusId` | `APP_ID`、`SPLASH_ID`、`NATIVE_RECYCLERVIEW_ID`、`REWARD_ID` |
-| 京东 | `JdId` | `APP_ID`、`ESPLASH_ID` |
-| Taptap | `TaptapId` | `MEDIA_ID`、`MEDIA_KEY`、`SPLASH_ID`、`REWARD_ID` |
-| OSET | `OpenSetId` | `APP_KEY`、`SPLASH_ID`、`REWARD_ID` |
-| 启明 | `QiMingId` | `REWARD_ID`（需在启明后台创建） |
-| 华为 | `HwId` | `SPLASH_ID_PORTRAIT`、`REWARD_ID` |
-| 倍孜 | `BeiziId` | `SPLASH_ID`、`REWARD_ID` |
-| AdMob | `AdMobId` | `APP_ID`、`SPLASH_ID`、`REWARD_ID` |
-| 阿里 Tanx | `TanxId` | `APP_ID`、`APP_KEY` |
-| InMobi | `InMobiId` | `APP_ID`、`FEED_ID`（真实值需在 InMobi 后台创建，见下） |
-| 友盟+ U-AppWin | `UmengId` | `APP_KEY`、`SPLASH_ID`、`FEED_ID`、`REWARD_ID`（真实值需在友盟后台创建，见下） |
-| 新浪移动联盟 | `SinaId` | `APP_KEY`、`APP_RID`（当前为官方 Sample 的示例值） |
+| 穿山甲 | `CsjId` | `APP_ID`、`SPLASH_ID`、`NATIVE_RECYCLERVIEW_ID`、`INTER_ID`、`BANNER_ID`、`REWARD_ID` |
+| 优量汇（广点通） | `GDTId` | `APP_ID`、`SPLASH_ID`、`NATIVE_EXPRESS_ID_PICTURE_VIDEO`、`INTERTERISTAL_ID`、`BANNER_ID`、`REWARD_VIDEO_AD_ID_SUPPORT_H` |
+| 百度 | `BaiduId` | `APP_ID`、`SPLASH_ID`、`NATIVE_SIMPLE_ID`、`INTER_ID`、`REWARD_ID` |
+| 快手 | `KsId` | `APP_ID`、`SPLASH_ID`、`FEED_ID`、`INTER_ID`、`BANNER_ID`、`REWARD_ID` |
+| Sigmob | `SigmobId` | `APP_ID`、`APP_KEY`、`SPLASH_ID`、`INTER_ID`、`FEED_ID`、`REWARD_ID` |
+| 米盟 | `MimoId` | `SPLASH_ID`、`INTER_ID`、`BANNER_ID`、`REWARD_ID`（需在米盟后台创建） |
+| 美数 | `MSId` | `APP_ID`、`SPLASH_ID`、`INTER_ID`、`BANNER_ID`、`FEED_ID`、`REWARD_ID` |
+| 章鱼 | `OctopusId` | `APP_ID`、`SPLASH_ID`、`INTER_ID`、`BANNER_ID`、`NATIVE_RECYCLERVIEW_ID`、`REWARD_ID` |
+| 京东 | `JdId` | `APP_ID`、`ESPLASH_ID`、`INTER_ID`、`BANNER_ID` |
+| Taptap | `TaptapId` | `MEDIA_ID`、`MEDIA_KEY`、`SPLASH_ID`、`INTER_FULL_ID`、`BANNER_ID`、`REWARD_ID` |
+| OSET | `OpenSetId` | `APP_KEY`、`SPLASH_ID`、`INTER_ID`、`BANNER_ID`、`REWARD_ID` |
+| 启明 | `QiMingId` | `INTER_ID`、`BANNER_ID`、`REWARD_ID`（需在启明后台创建） |
+| 华为 | `HwId` | `SPLASH_ID_PORTRAIT`、`INTER_ID_VIDEO`、`BANNER_ID`、`REWARD_ID` |
+| 倍孜 | `BeiziId` | `SPLASH_ID`、`INTER_ID`、`REWARD_ID` |
+| AdMob | `AdMobId` | `APP_ID`、`SPLASH_ID`、`INTER_ID`、`BANNER_ID`、`REWARD_ID` |
+| 阿里 Tanx | `TanxId` | `APP_ID`、`APP_KEY`（SDK 无插屏 / Banner 格式） |
+| InMobi | `InMobiId` | `APP_ID`、`FEED_ID`、`INTER_ID`、`BANNER_ID`（真实值需在 InMobi 后台创建，见下） |
+| 友盟+ U-AppWin | `UmengId` | `APP_KEY`、`SPLASH_ID`、`FEED_ID`、`INTER_ID`、`BANNER_ID`、`REWARD_ID`（真实值需在友盟后台创建，见下） |
+| 新浪移动联盟 | `SinaId` | `APP_KEY`、`APP_RID`（当前为官方 Sample 的示例值；SDK 无插屏 / Banner 格式） |
+| 爱奇艺联盟 | `QiYiId` | `APP_ID`、`OAID`、`SPLASH_ID`、`FEED_ID`、`BANNER_ID`、`INTER_ID`、`REWARD_ID`（当前为官方 Demo 示例值，`FEED_ID` 与 `BANNER_ID` 暂共用同一测试位） |
 
 > 米盟、启明、友盟未提供公共测试激励视频广告位，`REWARD_ID` 默认为空串，需在对应平台后台创建后通过
 > `loadRewardVideoAd(activity, platform, rewardAdId)` 传入，否则会直接回调 `onRewardVideoAdError`。
+
+> 插屏 / Banner 广告位同理：米盟、启明、京东、友盟、倍孜、美数未提供公共测试值，对应 `INTER_ID` /
+> `BANNER_ID` 默认为空串，需在平台后台创建后通过 `loadInterstitialAd(activity, platform, adId)` /
+> `loadBannerAd(activity, container, platform, adId)` 传入；快手的 `BANNER_ID` 为占位示例值，上线前必须替换。
 
 > 启明（`QIMING`）与 Tanx 的开屏广告位在 `loadAdByType` 中为 `TODO` 占位，
 > 接入时通过 `loadSplashAd(context, platform, container, id)` 传入，或直接替换占位串。
 
 AdMob 还需在清单中配置 `com.google.android.gms.ads.APPLICATION_ID`，替换 `library` 清单里的示例值。
+
+> 爱奇艺联盟的 AppId 与广告位同样取自官方 Demo。**OAID 为初始化必传项**，缺失会明显影响广告转化效果：
+> 可通过 `initSDKByAdPlatform(context, AdPlatform.QIYI, appId, oaid)` 传入，或在拿到 OAID 后调用
+> `QiYiAd.setOaid(oaid)`。本工程未内置 OAID SDK 采集，`Id.QiYiId.OAID` 默认为空串。
+> `library` 未接入微信开放平台 SDK，因此爱奇艺的「微信生态链路预算广告」（小程序落地页）需使用方自行补充依赖。
 
 > InMobi 不提供公共测试账号：`Id.InMobiId.APP_ID`（Account ID）与 `FEED_ID`（原生广告位）默认为空串 / `0`，
 > 需在 InMobi 后台创建后填写，或通过 `initSDKByAdPlatform(context, AdPlatform.INMOBI, appId, null)` 与
@@ -891,7 +1036,7 @@ AdMob 还需在清单中配置 `com.google.android.gms.ads.APPLICATION_ID`，替
 
 ---
 
-### 11. 混淆规则
+### 13. 混淆规则
 
 `library/build.gradle` 中通过 `consumerProguardFiles 'proguard-rules.pro'` 声明，
 使用方开启 `minifyEnabled` 后规则会自动生效（已包含各平台 `-keep` / `-dontwarn`）。
@@ -900,25 +1045,30 @@ AdMob 还需在清单中配置 `com.google.android.gms.ads.APPLICATION_ID`，替
 
 1. Sigmob 原工程要求 `-dontoptimize`，而 AGP 不允许在 consumer 规则中声明全局优化选项，
    如需保留请在使用方 `proguard-rules.pro` 中自行添加；
-2. 若使用方对 `library` 包名做了混淆/加固，需保证 `AdPlatform`、`loadAdByType`、`LocalAdBridge`、`SplashAdCallback`、`RewardVideoAdCallback`
-   等入口类不被裁剪（SDK 源码中已通过 `@Keep` / `@MTProtector` 标注）。
+2. 若使用方对 `library` 包名做了混淆/加固，需保证 `AdPlatform`、`loadAdByType`、`LocalAdBridge`、`SplashAdCallback`、`InterstitialAdCallback`、`BannerAdCallback`、`RewardVideoAdCallback`
+   等入口类不被裁剪（SDK 源码中已通过 `@Keep` 标注，也可由使用方 proguard 规则保留）。
 
 ---
 
-### 12. 注意事项
+### 14. 注意事项
 
 - **回调时机**：必须等 `onSplashAdLoaded` 拿到广告 View 后再 `addView`，不要自行预估时间。
 - **回调唯一**：`LocalAdBridge` 只保存最后一次注册的回调，多页面使用时注意注册时机与 `clear()`。
 - **视频广告上下文**：`loadRewardVideoAd` 的第一个参数必须是 `Activity`（全屏播放依赖 Activity），传入非 Activity 的 `Context` 会直接回调错误。
 - **视频广告奖励**：`onRewardVideoAdRewarded` 仅表示用户满足发奖条件，使用方应在此发放奖励；部分平台一次播放可能回调多次，如需严格去重请在业务侧做幂等处理。
 - **ABI**：SDK 与使用方均限制 `arm64-v8a` / `armeabi-v7a`，模拟器（x86）下广告可能无法加载。
+- **插屏上下文**：`loadInterstitialAd` 的第一个参数必须是 `Activity`（插屏全屏展示依赖 Activity），传入非 Activity 的 `Context` 会直接回调错误。
+- **插屏自动展示**：多数平台在加载成功后由 SDK 立即展示；未实现插屏的平台会直接回调 `onInterstitialAdError`。
+- **Banner 容器**：`loadBannerAd` 的容器宽度建议占满屏幕；广告 View 由 SDK 自行加入容器，不要在回调前抢先 `removeAllViews()`。百度、Sigmob、倍孜不支持 Banner 时会直接回调 `onBannerAdError`。
 - **横竖屏**：`loadSplashAd` 依据 `Configuration.orientation` 分发，横屏仅支持米盟与 Taptap。
 - **开屏容器尺寸**：容器需占满可展示区域，部分平台按容器尺寸请求素材。
 - **明文流量**：`library` 清单已开启 `usesCleartextTraffic`，部分平台素材依赖 HTTP。
+- **爱奇艺初始化线程**：爱奇艺联盟 SDK 要求 `QySdk.init` 在主线程调用，非主线程会抛 `Wrong Thread! Please init QySdk in main thread.`；`loadAdByType` 会在加载前按需初始化，确保在 Activity / Application 的主线程发起请求即可。
+- **爱奇艺回调线程**：其 Banner 与激励视频的交互回调运行在 SDK 子线程，`QiYiAd` 已统一切回主线程后再对外转发，使用方无需额外做线程切换。
 
 ---
 
-### 13. 构建与产物
+### 15. 构建与产物
 
 ```bash
 ./gradlew :library:assembleDebug      # 产物：library/build/outputs/aar/library-debug.aar
@@ -932,8 +1082,9 @@ AdMob 还需在清单中配置 `com.google.android.gms.ads.APPLICATION_ID`，替
 | 文件 | 职责 |
 | --- | --- |
 | `SplashActivity`（launcher） | 用 AndroidX 权限 API 申请运行时权限 → 注册 `LocalAdBridge` 回调 → 加载开屏广告 → 广告结束 / 超时 / 点击“跳过”后进入主页；目标平台为华为时自动切换到 `SplashView` 容器 |
-| `MainActivity` | 下拉选择平台，发起开屏（跳转启动页）、信息流与视频广告请求、清空容器，并在日志面板查看回调时序与 `Init.adSDKIsLoaded` 初始化状态 |
-| `AdDemo` | 平台清单（开屏 17 家 / 信息流 11 家 / 视频广告 15 家）与运行时权限列表 |
+| `MainActivity` | 下拉选择平台，发起开屏（跳转启动页）、信息流、插屏、Banner 与视频广告请求、清空容器，并在日志面板查看回调时序与 `Init.adSDKIsLoaded` 初始化状态 |
+| `AllAdsActivity` | 全广告页：进入即按 SDK 轮流加载全部广告形式（开屏 / 信息流 / 插屏 / Banner / 视频广告），请求逐个派发、开屏展示期间挂起队列，避免请求过于频繁；页面只保留广告容器 |
+| `AdDemo` | 平台清单（开屏 18 家 / 信息流 12 家 / 插屏 18 家 / Banner 15 家 / 视频广告 16 家）与运行时权限列表 |
 | `AdLog` | 回调日志缓冲，按时间记录并同步输出到 Logcat（tag：`AdExample`） |
 
 示例的 `build.gradle` 中同样把 `sourceCompatibility` / `targetCompatibility` 设为 17，

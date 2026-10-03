@@ -1,4 +1,6 @@
 <resources>
     <!-- 以下字符串在原工程中被布局/菜单引用但缺失，此处补齐以保证资源链接通过 -->
     <string name="why_this_ad">为什么展示此广告</string>
+    <!-- 部分广告 SDK（穿山甲、快手）初始化时需要应用名称，库模块自行提供一个默认值 -->
+    <string name="app_name">AdAggregation</string>
 </resources>

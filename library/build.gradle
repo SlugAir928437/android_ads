@@ -64,6 +64,10 @@ dependencies {
     api libs.androidx.appcompat
     api libs.androidx.cardview
     api libs.androidx.constraintlayout
+    // 美数 SDK（ad_adapter.BaseFullScreenVideoAd 等）内部引用 LocalBroadcastManager，
+    // 该 class 早已从 androidx.core 拆分为独立库且 AAR 未随包传递，缺失会在全屏视频
+    // 加载成功回调时抛出 NoClassDefFoundError，故在此显式声明（api 传递给使用方）
+    api libs.androidx.localbroadcastmanager
     api libs.androidx.fragment.ktx
     api libs.androidx.recyclerview
     api libs.androidx.swiperefreshlayout
@@ -97,7 +101,7 @@ dependencies {
     api(name: 'Baidu_MobAds_SDK-release_v9.422', ext: 'aar')            // 百度
     api(name: 'ad-beizi-5.2.2.0', ext: 'aar')                           // 倍孜
     api(name: 'open_ad_sdk_7.2.2.1', ext: 'aar')                        // 穿山甲
-    api(name: 'GDTSDK.unionNormal.4.662.1532', ext: 'aar')              // 广点通
+    api(name: 'GDTSDK.unionNormal.4.662.1532', ext: 'aar')              // 广点通（腾讯优量汇）
     api(name: 'kssdk-ad-4.9.20.5-publishRelease-1910680d9f', ext: 'aar')// 快手
     api(name: 'wind-common-1.8.7', ext: 'aar')                          // Sigmob
     api(name: 'wind-sdk-4.24.9', ext: 'aar')
@@ -121,6 +125,10 @@ dependencies {
 
     // 新浪移动联盟（只有信息流，SDK 为普通 jar，依赖使用方在清单中声明其 Browser Activity）
     api(name: 'sax-min-sdk', ext: 'jar')
+
+    // 爱奇艺联盟（iQiYi iadsdk，包名 com.mcto.sspsdk；模板渲染，含开屏 / 信息流 / Banner / 插屏 / 激励视频）
+    // AAR 自带清单（各广告 Activity、QyFileProvider、模拟器检测 Service）与 jni 库，无需宿主重复声明
+    api(name: 'iadsdk-release-2.5.001.112', ext: 'aar')
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

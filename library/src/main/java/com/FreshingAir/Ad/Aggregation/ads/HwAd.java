@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import android.app.Activity;
@@ -7,13 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.FreshingAir.Ad.Aggregation.AdPlatform;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 import com.FreshingAir.Ad.Aggregation.Init;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.FreshingAir.Ad.Aggregation.SplashAdCallback;
 import com.huawei.hms.ads.AdListener;
@@ -41,7 +43,7 @@ import com.huawei.hms.ads.splash.SplashView;
 
 import java.util.List;
 
-@MTProtector
+
 public class HwAd {
 
     private static final String TAG = "华为广告 SDK";
@@ -61,7 +63,7 @@ public class HwAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdFailedToLoad(int errorCode) {
                 // 广告加载失败时调用, 跳转至App主界面
                 Log.e(TAG, "广告加载失败，错误码：" + errorCode);
@@ -92,7 +94,7 @@ public class HwAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdClick() {
                 // 广告被点击时调用
                 Log.i(TAG, "广告被点击");
@@ -108,52 +110,69 @@ public class HwAd {
         Log.i(TAG, "bindService result: " + result);
         return result;
     }
+    /**
+     * 兼容旧入口：统一转发到新的 Banner 契约方法。
+     */
+    
     public static void HwBannerAd(String adId, BannerView bannerView, FrameLayout adFrameLayout) {
-        /*常用的标准横幅广告尺寸如下表所示：
-            类型	尺寸（宽*高，以dp为单位）	说明
-            BANNER_SIZE_320_50	320x50	普通横幅广告，适用于手机设备。
-            BANNER_SIZE_320_100	320x100	大型横幅广告，适用于手机设备。
-            BANNER_SIZE_300_250	300x250	中矩形横幅广告，适用于手机设备。
-            BANNER_SIZE_360_57	360x57	普通横幅广告，适用于1080*170px的广告素材。
-            BANNER_SIZE_360_144	360x144	大型横幅广告，适用于1080*432px的广告素材。
-            BANNER_SIZE_468_60	468x60	普通横幅广告，适用于手机设备。
-            BANNER_SIZE_728_90	728x90	普通横幅广告，适用于横屏平板和竖屏手机。
-            BANNER_SIZE_SMART	屏幕宽度 x 32|50|90	智能横幅广告，根据设备的宽高比自动调整广告尺寸，适用于手机设备。
-            BANNER_SIZE_ADVANCED	屏幕宽度 x 最优高度	自适应横幅广告，根据设备的尺寸和横竖屏状态计算出合适的尺寸。
-        说明
-            在中国大陆区域暂只支持BANNER_SIZE_360_57和BANNER_SIZE_360_144。
-            在非中国大陆区域建议使用BANNER_SIZE_320_50和BANNER_SIZE_300_250。
-            更多广告尺寸请参见API文档中的BannerAdSize类。*/
+        Context context = bannerView != null ? bannerView.getContext()
+                : (adFrameLayout != null ? adFrameLayout.getContext() : null);
+        Activity activity = context instanceof Activity ? (Activity) context : null;
+        if (activity == null) {
+            BannerAdCallback.onBannerAdError(context, -1, "Banner 展示需要 Activity 上下文");
+            return;
+        }
+        HwBannerAd(activity, adId, adFrameLayout);
+    }
 
-        // 空指针防护（Kotlin的!!在Java中需要显式判断）
-        if (bannerView == null || adFrameLayout == null) {
-            Log.e(TAG, "BannerView或AdFrameLayout为空");
+    /**
+     * 华为 Banner 广告（String 广告位）。
+     * 先清空容器并加入横幅 View，加载成功后回调 onBannerAdLoaded，失败回调 onBannerAdError。
+     *
+     * @param activity  展示广告的页面
+     * @param adId      Banner 广告位 ID
+     * @param container Banner 容器，广告 View 会加入其中
+     */
+    
+    public static void HwBannerAd(Activity activity, String adId, ViewGroup container) {
+        if (activity == null) {
+            BannerAdCallback.onBannerAdError(null, -1, "Banner 展示需要 Activity 上下文");
+            return;
+        }
+        if (adId == null || adId.trim().isEmpty()) {
+            BannerAdCallback.onBannerAdError(activity, -1, "广告位 ID 为空");
+            return;
+        }
+        if (container == null) {
+            BannerAdCallback.onBannerAdError(activity, -1, "Banner 容器为空");
             return;
         }
 
         // "testw6vs28auh3"为测试专用的广告位ID，App正式发布时需要改为正式的广告位ID
-        // 设置广告位ID和广告尺寸
+        final BannerView bannerView = new BannerView(activity);
+        // 设置广告位ID和广告尺寸（中国大陆区域暂只支持 360*57 与 360*144）
         bannerView.setAdId(adId);
         bannerView.setBannerAdSize(BannerAdSize.BANNER_SIZE_360_57);
-        adFrameLayout.addView(bannerView);
-
         // 设置轮播时间间隔为60秒
         bannerView.setBannerRefresh(60);
-
-        // 创建广告请求，加载广告
-        AdParam adParam = new AdParam.Builder().build();
-        bannerView.loadAd(adParam);
+        container.removeAllViews();
+        container.addView(bannerView);
 
         bannerView.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
                 // 广告加载成功时调用
+                Log.i(TAG, "Banner 广告加载成功");
+                BannerAdCallback.onBannerAdLoaded(activity, container);
             }
 
             @Override
+            
             public void onAdFailed(int errorCode) {
                 // 广告加载失败时调用
+                Log.e(TAG, "Banner 广告加载失败，错误码：" + errorCode);
                 bannerView.destroy();
+                BannerAdCallback.onBannerAdError(activity, errorCode, null);
             }
 
             @Override
@@ -162,7 +181,6 @@ public class HwAd {
             }
 
             @Override
-            @MTProtector
             public void onAdClicked() {
                 // 广告点击时调用
             }
@@ -177,9 +195,25 @@ public class HwAd {
                 // 广告关闭时调用
                 bannerView.destroy();
             }
+
+            @Override
+            public void onAdImpression() {
+                // 广告曝光时调用
+            }
         });
+
+        // 创建广告请求，加载广告
+        bannerView.loadAd(new AdParam.Builder().build());
     }
-    @MTProtector
+
+    /**
+     * 华为 Banner 广告（long 广告位，内部转换为 String）。
+     */
+    
+    public static void HwBannerAd(Activity activity, long adId, ViewGroup container) {
+        HwBannerAd(activity, String.valueOf(adId), container);
+    }
+    
     public static void HwNativeAd(Context context, String adId) {
         // "testy63txaom86"为测试专用的广告位ID，App正式发布时需要改为正式的广告位ID
         NativeAdLoader.Builder builder = new NativeAdLoader.Builder(context, adId);
@@ -187,7 +221,7 @@ public class HwAd {
             // 广告加载成功后调用
         }).setAdListener(new AdListener() {
             @Override
-            @MTProtector
+            
             public void onAdFailed(int errorCode) {
                 // 广告加载失败时调用
             }
@@ -203,13 +237,13 @@ public class HwAd {
             }
         }).setAdListener(new AdListener() {
             @Override
-            @MTProtector
+            
             public void onAdLoaded() {
                 Log.i(TAG, "load ad, success:");
             }
 
             @Override
-            @MTProtector
+            
             public void onAdFailed(int errorCode) {
                 Log.e(TAG, "fail to load ad, errorCode is:" + errorCode);
             }
@@ -219,44 +253,69 @@ public class HwAd {
         // 从云端获取广告
         nativeAdLoader.loadAd(new AdParam.Builder().setSupportTemplate(true).build());
     }
+    /**
+     * 兼容旧入口：统一转发到新的插屏契约方法。
+     */
+    
     public static void HwInterstitialAd(Context context, Activity activity, String slotId){
-        InterstitialAd interstitialAd;
-        interstitialAd = new InterstitialAd(context);
+        HwInterstitialAd(activity, slotId);
+    }
+
+    /**
+     * 华为插屏广告（String 广告位）。
+     * 加载成功后回调 onInterstitialAdLoaded 并自动展示；
+     * 展示回调 onInterstitialAdShow，关闭回调 onInterstitialAdClose，失败回调 onInterstitialAdError。
+     *
+     * @param activity 展示插屏所需的 Activity
+     * @param slotId   插屏广告位 ID
+     */
+    
+    public static void HwInterstitialAd(Activity activity, String slotId){
+        if (activity == null) {
+            InterstitialAdCallback.onInterstitialAdError(null, -1, "插屏展示需要 Activity 上下文");
+            return;
+        }
+        if (slotId == null || slotId.trim().isEmpty()) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "广告位 ID 为空");
+            return;
+        }
+        final InterstitialAd interstitialAd = new InterstitialAd(activity);
         // "testb4znbuh3n2"为测试专用的广告位ID，App正式发布时需要改为正式的广告位ID
         interstitialAd.setAdId(slotId);
-        // 加载插屏广告
-        AdParam.Builder builder = new AdParam.Builder();
-        // 可选 设置实时bidding广告位参数
-        BiddingParam biddingParam = new BiddingParam();
-        builder.addBiddingParamMap(slotId, biddingParam);
-        builder.setTMax(500);
         interstitialAd.setAdListener(new AdListener(){
                                          @Override
-                                         @MTProtector
+                                         
                                          public void onAdLoaded() {
                                              // 广告加载成功时调用
-                                             // 显示广告
+                                             Log.i(TAG, "插屏广告加载成功");
+                                             InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                                             // 加载成功后自动展示
                                              if (interstitialAd.isLoaded()) {
                                                  interstitialAd.show(activity);
                                              } else {
-                                                 Toast.makeText(context, "Ad did not load", Toast.LENGTH_SHORT).show();
+                                                 InterstitialAdCallback.onInterstitialAdError(activity, -1, "插屏广告尚未就绪");
                                              }
                                          }
                                          @Override
+                                         
                                          public void onAdFailed(int errorCode) {
                                              // 广告加载失败时调用
+                                             Log.e(TAG, "插屏广告加载失败，错误码：" + errorCode);
+                                             InterstitialAdCallback.onInterstitialAdError(activity, errorCode, null);
                                          }
                                          @Override
-                                         @MTProtector
+                                         
                                          public void onAdClosed() {
                                              // 广告关闭时调用
+                                             Log.i(TAG, "插屏广告关闭");
+                                             InterstitialAdCallback.onInterstitialAdClose(activity);
                                          }
                                          @Override
                                          public void onAdClicked() {
                                              // 广告点击时调用
                                          }
                                          @Override
-                                         @MTProtector
+                                         
                                          public void onAdLeave() {
                                              // 广告离开时调用
                                          }
@@ -264,12 +323,26 @@ public class HwAd {
                                          public void onAdOpened() {
                                              // 广告打开时调用
                                          }
+                                         @Override
+                                         public void onAdImpression() {
+                                             // 广告曝光时调用
+                                             Log.i(TAG, "插屏广告曝光");
+                                             InterstitialAdCallback.onInterstitialAdShow(activity);
+                                         }
                                      }
         );
-        //builder.setCur("币种字符列表"); //？
+        // 加载插屏广告
         interstitialAd.loadAd(new AdParam.Builder().build());
     }
-    @MTProtector
+
+    /**
+     * 华为插屏广告（long 广告位，内部转换为 String）。
+     */
+    
+    public static void HwInterstitialAd(Activity activity, long slotId){
+        HwInterstitialAd(activity, String.valueOf(slotId));
+    }
+    
     public static void HwInstreamAd(Context context, String slotId, @NonNull InstreamView instreamView){
         // "testy3cglm3pj0"为测试专用的广告位ID，App正式发布时需要改为正式的广告位ID
         InstreamAdLoader.Builder builder = new InstreamAdLoader.Builder(context, slotId);
@@ -279,7 +352,7 @@ public class HwAd {
                 .setMaxCount(1)
                 .setInstreamAdLoadListener(new InstreamAdLoadListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onAdLoaded(List<InstreamAd> ads) {
                         // 广告加载成功后调用
                     }
@@ -301,7 +374,7 @@ public class HwAd {
 
         instreamView.setInstreamMediaStateListener(new InstreamMediaStateListener() {
             @Override
-            @MTProtector
+            
             public void onMediaProgress(int percent, int playTime) {
                 // 播放过程
             }
@@ -312,7 +385,7 @@ public class HwAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onMediaPause(int playTime) {
                 // 播放暂停
             }
@@ -323,7 +396,7 @@ public class HwAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onMediaCompletion(int playTime) {
                 // 播放完成
             }
@@ -354,19 +427,19 @@ public class HwAd {
      * @param activity 展示广告的页面
      * @param slotId   激励视频广告位 ID
      */
-    @MTProtector
+    
     public static void HwRewardVideoAd(final Activity activity, String slotId) {
         final RewardAd rewardAd = new RewardAd(activity, slotId);
         rewardAd.loadAd(new AdParam.Builder().build(), new RewardAdLoadListener() {
             @Override
-            @MTProtector
+            
             public void onRewardAdFailedToLoad(int errorCode) {
                 Log.e(TAG, "激励视频加载失败，错误码：" + errorCode);
                 RewardVideoAdCallback.onRewardAdError(activity, errorCode, null);
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardedLoaded() {
                 Log.i(TAG, "激励视频加载成功");
                 if (!rewardAd.isLoaded()) {
@@ -376,28 +449,28 @@ public class HwAd {
                 RewardVideoAdCallback.onRewardAdLoaded(activity);
                 rewardAd.show(activity, new RewardAdStatusListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onRewardAdClosed() {
                         Log.i(TAG, "激励视频关闭");
                         RewardVideoAdCallback.onRewardAdClose(activity);
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onRewardAdFailedToShow(int errorCode) {
                         Log.e(TAG, "激励视频展示失败，错误码：" + errorCode);
                         RewardVideoAdCallback.onRewardAdError(activity, errorCode, null);
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onRewardAdOpened() {
                         Log.i(TAG, "激励视频开始播放");
                         RewardVideoAdCallback.onRewardAdShow(activity);
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onRewarded(Reward reward) {
                         Log.i(TAG, "激励视频发放奖励");
                         RewardVideoAdCallback.onRewardAdRewarded(activity,

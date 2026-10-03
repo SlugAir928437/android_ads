@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import android.content.Context;
@@ -22,6 +22,8 @@ import com.FreshingAir.Ad.Aggregation.Init;
 import com.FreshingAir.Ad.Aggregation.R;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.FreshingAir.Ad.Aggregation.SplashAdCallback;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 import com.sigmob.windad.OnInitializationListener;
 import com.sigmob.windad.OnStartListener;
 import com.sigmob.windad.Splash.WindSplashAD;
@@ -30,6 +32,9 @@ import com.sigmob.windad.Splash.WindSplashAdRequest;
 import com.sigmob.windad.WindAdError;
 import com.sigmob.windad.WindAdOptions;
 import com.sigmob.windad.WindAds;
+import com.sigmob.windad.newInterstitial.WindNewInterstitialAd;
+import com.sigmob.windad.newInterstitial.WindNewInterstitialAdListener;
+import com.sigmob.windad.newInterstitial.WindNewInterstitialAdRequest;
 import com.sigmob.windad.natives.NativeADEventListener;
 import com.sigmob.windad.natives.NativeAdPatternType;
 import com.sigmob.windad.natives.WindNativeAdData;
@@ -45,11 +50,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@MTProtector
+
 public class SigmobAd {
 
     private static final String TAG = "Sigmob广告 SDK";
-    @MTProtector
+    
     public static void initSigmobSDK(Context context, String appId, String appKey){
         WindAds ads = WindAds.sharedAds();
         WindAdOptions options = new WindAdOptions(appId, appKey);
@@ -57,7 +62,7 @@ public class SigmobAd {
         ads.init(context,options, new OnInitializationListener() {
 
             @Override
-            @MTProtector
+            
             public void onInitializationSuccess() {
                 Log.e(TAG, "SDK初始化成功");
                 Init.adSDKisLoaded.put(AdPlatform.SIGMOB, true);
@@ -70,7 +75,7 @@ public class SigmobAd {
         });
         ads.start(new OnStartListener() {
             @Override
-            @MTProtector
+            
             public void onStartSuccess() {
                 Log.i(TAG, "SDK开始成功");
             }
@@ -90,7 +95,7 @@ public class SigmobAd {
         //splashAdRequest.setFetchDelay(5);
         WindSplashAD mWindSplashAD = new WindSplashAD(splashAdRequest, new WindSplashADListener() {
             @Override
-            @MTProtector
+            
             public void onSplashAdShow(String placementId) {
                 Log.i(TAG, "广告曝光");
                 SplashAdCallback.onSplashAdLoaded(context, adContainer);
@@ -103,7 +108,7 @@ public class SigmobAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onSplashAdLoadFail(WindAdError error, String placementId) {
 
                 Log.i(TAG, "广告加载失败，错误信息："+error.getMessage()+"("+error.getErrorCode()+")");
@@ -111,7 +116,7 @@ public class SigmobAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onSplashAdShowError(WindAdError error, String placementId) {
                 Log.i(TAG, "广告曝光失败，错误信息："+error.getMessage()+"("+error.getErrorCode()+")");
                 SplashAdCallback.goToMainActivity(context);
@@ -119,14 +124,14 @@ public class SigmobAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onSplashAdClick(String placementId) {
 
                 Log.i(TAG, "用户点击了广告");
             }
 
             @Override
-            @MTProtector
+            
             public void onSplashAdClose(String placementId) {
 
                 Log.i(TAG, "广告关闭");
@@ -156,13 +161,13 @@ public class SigmobAd {
         WindNativeUnifiedAd windNativeUnifiedAd = new WindNativeUnifiedAd(new WindNativeAdRequest(placementId, userId, null));
         windNativeUnifiedAd.setNativeAdLoadListener(new WindNativeUnifiedAd.WindNativeAdLoadListener() {
             @Override
-            @MTProtector
+            
             public void onAdError(WindAdError error, String placementId) {
                 Log.e("Sigmob广告","广告加载失败，错误信息："+error.getMessage()+"("+error.getErrorCode()+")");
                 adContainer.removeAllViews();
             }
             @Override
-            @MTProtector
+            
             public void onAdLoad(List<WindNativeAdData> adDataList, String placementId) {
                 Log.d("Sigmob广告", "onAdLoaded");
                 WindNativeAdData windNativeAdData = adDataList.get(0);
@@ -207,14 +212,14 @@ public class SigmobAd {
                         }
 
                         @Override
-                        @MTProtector
+                        
                         public void onVideoCompleted() {
                             windNativeAdData.startVideo();
                             Log.d("Sigmob广告", "onVideoCompleted: ");
                         }
 
                         @Override
-                        @MTProtector
+                        
                         public void onVideoError(WindAdError windAdError) {
                             Log.d("Sigmob广告", "onVideoError: " + windAdError.toString());
                             adContainer.removeAllViews();
@@ -242,7 +247,7 @@ public class SigmobAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdClicked() {
 
                     }
@@ -258,7 +263,7 @@ public class SigmobAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdError(WindAdError error) {
                         adContainer.removeAllViews();
                     }
@@ -278,13 +283,13 @@ public class SigmobAd {
      * @param placementId 激励视频广告位 ID
      * @param userId      用户标识，可传 null
      */
-    @MTProtector
+    
     public static void SigmobRewardVideoAd(Context context, String placementId, String userId){
         final WindRewardVideoAd[] holder = new WindRewardVideoAd[1];
         WindRewardVideoAd rewardVideoAd = new WindRewardVideoAd(new WindRewardAdRequest(placementId, userId, null));
         rewardVideoAd.setWindRewardVideoAdListener(new WindRewardVideoAdListener() {
             @Override
-            @MTProtector
+            
             public void onRewardAdLoadSuccess(String placementId) {
                 Log.i(TAG, "激励视频加载成功");
                 RewardVideoAdCallback.onRewardAdLoaded(context);
@@ -302,7 +307,7 @@ public class SigmobAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardAdPlayStart(String placementId) {
                 Log.i(TAG, "激励视频开始播放");
                 RewardVideoAdCallback.onRewardAdShow(context);
@@ -317,21 +322,21 @@ public class SigmobAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardAdClosed(String placementId) {
                 Log.i(TAG, "激励视频关闭");
                 RewardVideoAdCallback.onRewardAdClose(context);
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardAdRewarded(WindRewardInfo windRewardInfo, String placementId) {
                 Log.i(TAG, "激励视频发放奖励");
                 RewardVideoAdCallback.onRewardAdRewarded(context, null, 0);
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardAdLoadError(WindAdError error, String placementId) {
                 int code = error != null ? error.getErrorCode() : 0;
                 String msg = error != null ? error.getMessage() : null;
@@ -340,7 +345,7 @@ public class SigmobAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardAdPlayError(WindAdError error, String placementId) {
                 int code = error != null ? error.getErrorCode() : 0;
                 String msg = error != null ? error.getMessage() : null;
@@ -350,5 +355,106 @@ public class SigmobAd {
         });
         holder[0] = rewardVideoAd;
         rewardVideoAd.loadAd();
+    }
+
+    /**
+     * Sigmob 插屏广告（String 广告位）。
+     * 加载成功后回调 loaded，并自动调用 show 展示。
+     *
+     * 注意：WindNewInterstitialAdRequest 的第 1 个参数为 placementId（推断，需真机验证）。
+     *
+     * @param activity 展示插屏所需的 Activity
+     * @param adId     插屏广告位 ID
+     */
+    
+    public static void SigmobInterstitialAd(Activity activity, String adId) {
+        if (activity == null) {
+            InterstitialAdCallback.onInterstitialAdError(null, -1, "插屏展示需要 Activity 上下文");
+            return;
+        }
+        if (adId == null || adId.isEmpty()) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "广告位 ID 为空");
+            return;
+        }
+        final WindNewInterstitialAd[] holder = new WindNewInterstitialAd[1];
+        WindNewInterstitialAd ad = new WindNewInterstitialAd(
+                new WindNewInterstitialAdRequest(adId, null, null));
+        ad.setWindNewInterstitialAdListener(new WindNewInterstitialAdListener() {
+            @Override
+            public void onInterstitialAdLoadSuccess(String placementId) {
+                Log.i(TAG, "插屏广告加载成功");
+                InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                if (holder[0] != null) {
+                    holder[0].show(new HashMap<String, String>());
+                }
+            }
+
+            @Override
+            public void onInterstitialAdPreLoadSuccess(String placementId) {
+            }
+
+            @Override
+            public void onInterstitialAdPreLoadFail(String placementId) {
+            }
+
+            @Override
+            public void onInterstitialAdShow(String placementId) {
+                Log.i(TAG, "插屏广告展示");
+                InterstitialAdCallback.onInterstitialAdShow(activity);
+            }
+
+            @Override
+            public void onInterstitialAdClicked(String placementId) {
+            }
+
+            @Override
+            public void onInterstitialAdClosed(String placementId) {
+                Log.i(TAG, "插屏广告关闭");
+                InterstitialAdCallback.onInterstitialAdClose(activity);
+            }
+
+            @Override
+            public void onInterstitialAdLoadError(WindAdError error, String placementId) {
+                int code = error != null ? error.getErrorCode() : 0;
+                String msg = error != null ? error.getMessage() : null;
+                Log.e(TAG, "插屏广告加载失败，错误信息：" + msg + "(" + code + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, code, msg);
+            }
+
+            @Override
+            public void onInterstitialAdShowError(WindAdError error, String placementId) {
+                int code = error != null ? error.getErrorCode() : 0;
+                String msg = error != null ? error.getMessage() : null;
+                Log.e(TAG, "插屏广告展示失败，错误信息：" + msg + "(" + code + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, code, msg);
+            }
+        });
+        holder[0] = ad;
+        ad.loadAd();
+    }
+
+    /**
+     * Sigmob 插屏广告（long 广告位，内部转换为 String）。
+     */
+    
+    public static void SigmobInterstitialAd(Activity activity, long adId) {
+        SigmobInterstitialAd(activity, String.valueOf(adId));
+    }
+
+    /**
+     * Sigmob SDK 未提供 Banner API，直接回调错误，不抛异常。
+     */
+    
+    public static void SigmobBannerAd(Activity activity, String adId, ViewGroup container) {
+        Log.e(TAG, "Sigmob SDK 无 Banner API，不支持 Banner 广告");
+        BannerAdCallback.onBannerAdError(activity, -1, "Sigmob SDK 不支持 Banner 广告");
+    }
+
+    /**
+     * Sigmob Banner（long 广告位），同样不支持，直接回调错误。
+     */
+    
+    public static void SigmobBannerAd(Activity activity, long adId, ViewGroup container) {
+        SigmobBannerAd(activity, String.valueOf(adId), container);
     }
 }

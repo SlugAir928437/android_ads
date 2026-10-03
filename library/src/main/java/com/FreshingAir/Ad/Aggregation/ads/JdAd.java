@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import android.app.Activity;
@@ -11,8 +11,12 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import com.FreshingAir.Ad.Aggregation.AdPlatform;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 import com.FreshingAir.Ad.Aggregation.Init;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
 import com.FreshingAir.Ad.Aggregation.SplashAdCallback;
+import com.jd.ad.sdk.banner.JADBanner;
+import com.jd.ad.sdk.banner.JADBannerListener;
 import com.jd.ad.sdk.bl.initsdk.JADInitCallback;
 import com.jd.ad.sdk.bl.initsdk.JADPrivateController;
 import com.jd.ad.sdk.bl.initsdk.JADYunSdk;
@@ -20,6 +24,8 @@ import com.jd.ad.sdk.bl.initsdk.JADYunSdkConfig;
 import com.jd.ad.sdk.dl.addata.JADMaterialData;
 import com.jd.ad.sdk.dl.model.JADSlot;
 import com.jd.ad.sdk.fdt.utils.ScreenUtils;
+import com.jd.ad.sdk.interstitial.JADInterstitial;
+import com.jd.ad.sdk.interstitial.JADInterstitialListener;
 import com.jd.ad.sdk.nativead.JADNative;
 import com.jd.ad.sdk.nativead.JADNativeLoadListener;
 import com.jd.ad.sdk.nativead.JADNativeSplashInteractionListener;
@@ -28,14 +34,14 @@ import com.jd.ad.sdk.nativead.JADNativeWidget;
 import java.util.ArrayList;
 import java.util.List;
 
-@MTProtector
+
 public class JdAd {
 
     private static final String TAG = "京媒广告 SDK";
     public static int getWidth(Context context){
         return ScreenUtils.getPhoneWidth(context);
     }
-    @MTProtector
+    
     public static int getHeight(Context context){
         return ScreenUtils.getPhoneHeight(context);
     }
@@ -47,7 +53,7 @@ public class JdAd {
                 .setEnableLog(com.FreshingAir.Ad.Aggregation.BuildConfig.DEBUG) //测试阶段打开，可以通过日志排查问题，上线时去除该调用
                 .setPrivateController(new JADPrivateController() {
                     @Override
-                    @MTProtector
+                    
                     public String getOaid() {
                         return "";
                     }
@@ -64,7 +70,7 @@ public class JdAd {
              * 初始化成功
              */
             @Override
-            @MTProtector
+            
             public void onInitSuccess() {
                 Log.i(TAG, "SDK同步初始化成功");
                 initstatus[0] = true;
@@ -87,7 +93,7 @@ public class JdAd {
              * 初始化成功
              */
             @Override
-            @MTProtector
+            
             public void onInitSuccess() {
                 Log.i(TAG, "SDK异步初始化成功");
                 initstatus[1] = true;
@@ -105,7 +111,7 @@ public class JdAd {
         });
     }
 
-    @MTProtector
+    
     public static void JadSplashAd(Context context,String slotID,float expressImageWidth,float expressImageHeight,ViewGroup adView){
         JADSlot slot = new JADSlot.Builder()
                 .setSlotID(slotID)
@@ -137,7 +143,7 @@ public class JdAd {
                      * 广告曝光
                      */
                     @Override
-                    @MTProtector
+                    
                     public void onExposure() {
                         // TODO 广告曝光上报
                         Log.i(TAG, "广告曝光");
@@ -150,7 +156,7 @@ public class JdAd {
                      * @param time 倒计时当前数字
                      */
                     @Override
-                    @MTProtector
+                    
                     public void onCountdown(int time) {
                         // TODO：关于倒计时视图刷新可在这个回调中进行操作
 
@@ -184,7 +190,7 @@ public class JdAd {
              * 广告数据加载成功
              */
             @Override
-            @MTProtector
+            
             public void onLoadSuccess() {
                 // TODO：广告数据返回上报
             }
@@ -202,5 +208,166 @@ public class JdAd {
         });
         List<JADMaterialData> adList = mJADNative.getDataList();
         return mJADNative;
+    }
+
+    /**
+     * 加载并展示京媒插屏广告（加载成功后自动渲染并展示）。
+     *
+     * @param activity 展示广告的页面
+     * @param adId     插屏广告位 ID
+     */
+    
+    public static void JdInterstitialAd(Activity activity, String adId) {
+        if (activity == null || adId == null || adId.trim().isEmpty()) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "参数非法（Activity/广告位不能为空）");
+            return;
+        }
+        int width = getWidth(activity);
+        int height = getHeight(activity);
+        JADSlot slot = new JADSlot.Builder()
+                .setSlotID(adId)
+                .setAdType(JADSlot.AdType.INTERSTITIAL)
+                .setSize(width, height)
+                .build();
+        final JADInterstitial[] holder = new JADInterstitial[1];
+        JADInterstitial interstitial = new JADInterstitial(activity, slot);
+        holder[0] = interstitial;
+        interstitial.loadAd(new JADInterstitialListener() {
+            @Override
+            public void onLoadSuccess() {
+                Log.i(TAG, "插屏广告加载成功");
+                InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                // 加载成功后开始渲染
+                if (holder[0] != null) {
+                    holder[0].startRender();
+                }
+            }
+
+            @Override
+            
+            public void onLoadFailure(int code, String error) {
+                Log.e(TAG, "插屏广告加载失败，错误信息：" + error + "(" + code + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, code, error);
+            }
+
+            @Override
+            public void onRenderSuccess(View view) {
+                Log.i(TAG, "插屏广告渲染成功");
+                // 渲染成功后展示
+                if (holder[0] != null) {
+                    holder[0].showAd(activity);
+                }
+            }
+
+            @Override
+            
+            public void onRenderFailure(int code, String error) {
+                Log.e(TAG, "插屏广告渲染失败，错误信息：" + error + "(" + code + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, code, error);
+            }
+
+            @Override
+            
+            public void onExposure() {
+                Log.i(TAG, "插屏广告展示");
+                InterstitialAdCallback.onInterstitialAdShow(activity);
+            }
+
+            @Override
+            public void onClick() {
+                Log.i(TAG, "插屏广告被点击");
+            }
+
+            @Override
+            
+            public void onClose() {
+                Log.i(TAG, "插屏广告关闭");
+                InterstitialAdCallback.onInterstitialAdClose(activity);
+            }
+        });
+    }
+
+    /**
+     * 加载并展示京媒插屏广告（广告位为 long 时的便捷重载）。
+     */
+    public static void JdInterstitialAd(Activity activity, long adId) {
+        JdInterstitialAd(activity, String.valueOf(adId));
+    }
+
+    /**
+     * 加载并展示京媒 Banner 广告。
+     *
+     * @param activity  展示广告的页面
+     * @param adId      Banner 广告位 ID
+     * @param container 承载广告 View 的容器
+     */
+    
+    public static void JdBannerAd(Activity activity, String adId, @NonNull ViewGroup container) {
+        if (activity == null || container == null || adId == null || adId.trim().isEmpty()) {
+            BannerAdCallback.onBannerAdError(activity, -1, "参数非法（Activity/容器/广告位不能为空）");
+            return;
+        }
+        container.removeAllViews();
+        int width = container.getMeasuredWidth() > 0 ? container.getMeasuredWidth() : getWidth(activity);
+        int height = container.getMeasuredHeight() > 0 ? container.getMeasuredHeight() : getWidth(activity) / 6;
+        JADSlot slot = new JADSlot.Builder()
+                .setSlotID(adId)
+                .setAdType(JADSlot.AdType.BANNER)
+                .setSize(width, height)
+                .build();
+        new JADBanner(activity, slot).loadAd(new JADBannerListener() {
+            @Override
+            public void onLoadSuccess() {
+                Log.i(TAG, "Banner广告加载成功");
+            }
+
+            @Override
+            
+            public void onLoadFailure(int code, String error) {
+                Log.e(TAG, "Banner广告加载失败，错误信息：" + error + "(" + code + ")");
+                BannerAdCallback.onBannerAdError(activity, code, error);
+            }
+
+            @Override
+            public void onRenderSuccess(View view) {
+                Log.i(TAG, "Banner广告渲染成功");
+                if (view == null) {
+                    BannerAdCallback.onBannerAdError(activity, -1, "Banner广告视图为空");
+                    return;
+                }
+                container.removeAllViews();
+                container.addView(view);
+                BannerAdCallback.onBannerAdLoaded(activity, container);
+            }
+
+            @Override
+            
+            public void onRenderFailure(int code, String error) {
+                Log.e(TAG, "Banner广告渲染失败，错误信息：" + error + "(" + code + ")");
+                BannerAdCallback.onBannerAdError(activity, code, error);
+            }
+
+            @Override
+            public void onExposure() {
+                Log.i(TAG, "Banner广告曝光");
+            }
+
+            @Override
+            public void onClick() {
+                Log.i(TAG, "Banner广告被点击");
+            }
+
+            @Override
+            public void onClose() {
+                Log.i(TAG, "Banner广告关闭");
+            }
+        });
+    }
+
+    /**
+     * 加载并展示京媒 Banner 广告（广告位为 long 时的便捷重载）。
+     */
+    public static void JdBannerAd(Activity activity, long adId, @NonNull ViewGroup container) {
+        JdBannerAd(activity, String.valueOf(adId), container);
     }
 }

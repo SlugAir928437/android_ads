@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import static com.FreshingAir.Ad.Aggregation.SplashAdCallback.goToMainActivity;
@@ -21,7 +21,7 @@ import com.huawei.hms.ads.splash.SplashView;
 @Keep
 public class loadAdByType {
 
-    @MTProtector
+    
     public static AdPlatform getAdPlatform(@NonNull String adPlatform){
         switch (adPlatform){
             case "ADMOB":
@@ -60,6 +60,8 @@ public class loadAdByType {
                 return AdPlatform.UMENG;
             case "SINA":
                 return AdPlatform.SINA;
+            case "QIYI":
+                return AdPlatform.QIYI;
             default:
                 throw new IllegalArgumentException("非法参数：" + adPlatform);
         }
@@ -137,9 +139,12 @@ public class loadAdByType {
             case SINA:
                 SinaAd.InitSinaSDK(context, useOrDefault(appId, Id.SinaId.APP_KEY));
                 break;
+            case QIYI:
+                QiYiAd.InitQiYiSDK(context, useOrDefault(appId, Id.QiYiId.APP_ID), useOrDefault(appKey, Id.QiYiId.OAID));
+                break;
         }
     }
-    @MTProtector
+    
     public static void loadSplashAd(Context context, @NonNull AdPlatform selectedPlatform, ViewGroup SplashAdContainer){
         loadSplashAd(context, selectedPlatform, SplashAdContainer, null);
     }
@@ -150,7 +155,7 @@ public class loadAdByType {
      * @param splashAdId 开屏广告位 ID。传 null / 空串时使用 {@link Id} 中的示例值
      *                   （华为需传 SplashView 类型的容器，此处传入的 ID 同样适用）
      */
-    @MTProtector
+    
     public static void loadSplashAd(Context context, @NonNull AdPlatform selectedPlatform, ViewGroup SplashAdContainer,
                                     @Nullable String splashAdId){
         if(!Boolean.TRUE.equals(Init.adSDKisLoaded.get(selectedPlatform))) {
@@ -212,6 +217,9 @@ public class loadAdByType {
                         break;
                     case UMENG:
                         UmengAd.UmengSplashAd(context, useOrDefault(splashAdId, Id.UmengId.SPLASH_ID), SplashAdContainer);
+                        break;
+                    case QIYI:
+                        QiYiAd.QiYiSplashAd(context, useOrDefault(splashAdId, Id.QiYiId.SPLASH_ID), SplashAdContainer);
                         break;
                     default:
                         goToMainActivity(context);
@@ -289,6 +297,9 @@ public class loadAdByType {
             case SINA:
                 SinaAd.SinaFeedAd(feedAdContainer.getContext(), useOrDefault(feedAdId, Id.SinaId.APP_RID), feedAdContainer);
                 break;
+            case QIYI:
+                QiYiAd.QiYiFeedAd(feedAdContainer.getContext(), useOrDefault(feedAdId, Id.QiYiId.FEED_ID), feedAdContainer);
+                break;
             default:
                 Log.i("广告", "没有选中广告");
                 break;
@@ -301,7 +312,7 @@ public class loadAdByType {
      *
      * @param activity 展示广告的页面，广告展示、关闭等回调均回到该页面
      */
-    @MTProtector
+    
     public static void loadRewardVideoAd(@NonNull Activity activity, @NonNull AdPlatform selectedPlatform){
         loadRewardVideoAd(activity, selectedPlatform, null);
     }
@@ -315,7 +326,7 @@ public class loadAdByType {
      * @param rewardAdId 激励视频广告位 ID。传 null / 空串时使用 {@link Id} 中的示例值；
      *                   快手、Taptap 的广告位为 long，传入非数字字符串时同样回退到示例值
      */
-    @MTProtector
+    
     public static void loadRewardVideoAd(@NonNull Activity activity, @NonNull AdPlatform selectedPlatform,
                                          @Nullable String rewardAdId){
         if(!Boolean.TRUE.equals(Init.adSDKisLoaded.get(selectedPlatform))) {
@@ -368,6 +379,9 @@ public class loadAdByType {
             case UMENG:
                 UmengAd.UmengRewardVideoAd(activity, useOrDefault(rewardAdId, Id.UmengId.REWARD_ID));
                 break;
+            case QIYI:
+                QiYiAd.QiYiRewardVideoAd(activity, useOrDefault(rewardAdId, Id.QiYiId.REWARD_ID));
+                break;
             default:
                 Log.i("广告", "该平台未实现视频广告：" + selectedPlatform);
                 RewardVideoAdCallback.onRewardAdError(activity, -1, "该平台未实现视频广告：" + selectedPlatform);
@@ -375,14 +389,184 @@ public class loadAdByType {
         }
     }
 
+    /**
+     * 加载插屏广告，使用 {@link Id} 中的示例广告位。
+     *
+     * @param activity 展示广告的页面，插屏展示、关闭等回调均回到该页面
+     */
+    
+    public static void loadInterstitialAd(@NonNull Activity activity, @NonNull AdPlatform selectedPlatform){
+        loadInterstitialAd(activity, selectedPlatform, null);
+    }
+
+    /**
+     * 加载插屏广告，可自定义广告位 ID。
+     *
+     * 加载成功、开始展示、关闭、失败时，会分别回调
+     * {@link LocalAdBridge#onInterstitialAdLoaded} 等回调，使用方在此接管。
+     * 多数平台在加载成功后会随即自动展示。
+     *
+     * @param interstitialAdId 插屏广告位 ID。传 null / 空串时使用 {@link Id} 中的示例值；
+     *                         快手、Taptap、InMobi 的广告位为 long，传入非数字字符串时同样回退到示例值
+     */
+    
+    public static void loadInterstitialAd(@NonNull Activity activity, @NonNull AdPlatform selectedPlatform,
+                                          @Nullable String interstitialAdId){
+        if(!Boolean.TRUE.equals(Init.adSDKisLoaded.get(selectedPlatform))) {
+            initSDKByAdPlatform(activity, selectedPlatform);
+        }
+        switch (selectedPlatform) {
+            case ADMOB:
+                AdMob.AdMobInterstitialAd(activity, useOrDefault(interstitialAdId, Id.AdMobId.INTER_ID));
+                break;
+            case BAIDU:
+                BaiduAd.BaiduInterstitialAd(activity, useOrDefault(interstitialAdId, Id.BaiduId.INTER_ID));
+                break;
+            case BEIZI:
+                BeiZiAd.BeiziInterstitialAd(activity, useOrDefault(interstitialAdId, Id.BeiziId.INTER_ID));
+                break;
+            case CSJ:
+                CsjAd.CsjInterstitialAd(activity, useOrDefault(interstitialAdId, Id.CsjId.INTER_ID));
+                break;
+            case GDT:
+                GDTAd.GDTInterstitialAd(activity, useOrDefault(interstitialAdId, Id.GDTId.INTERTERISTAL_ID));
+                break;
+            case HW:
+                HwAd.HwInterstitialAd(activity, useOrDefault(interstitialAdId, Id.HwId.INTER_ID_VIDEO));
+                break;
+            case KS:
+                KsAd.KsInterstitialAd(activity, parseLongOr(useOrDefault(interstitialAdId, String.valueOf(Id.KsId.INTER_ID)), Id.KsId.INTER_ID));
+                break;
+            case SIGMOB:
+                SigmobAd.SigmobInterstitialAd(activity, useOrDefault(interstitialAdId, Id.SigmobId.INTER_ID));
+                break;
+            case MIMO:
+                MimoAd.MimoInterstitialAd(activity, useOrDefault(interstitialAdId, Id.MimoId.INTER_ID));
+                break;
+            case MS:
+                MsAd.MsInterstitialAd(activity, useOrDefault(interstitialAdId, Id.MSId.INTER_ID));
+                break;
+            case OCTOPUS:
+                OctopusAd.OctopusInterstitialAd(activity, useOrDefault(interstitialAdId, Id.OctopusId.INTER_ID));
+                break;
+            case TAPTAP:
+                TaptapAd.TaptapInterstitialAd(activity,
+                        parseLongOr(useOrDefault(interstitialAdId, String.valueOf(Id.TaptapId.horizontal.INTER_FULL_ID)), Id.TaptapId.horizontal.INTER_FULL_ID));
+                break;
+            case OSET:
+                OSETAd.OSETInterstitialAd(activity, useOrDefault(interstitialAdId, Id.OpenSetId.INTER_ID));
+                break;
+            case QIMING:
+                QiMingAd.QiMingInterstitialAd(activity, useOrDefault(interstitialAdId, Id.QiMingId.INTER_ID));
+                break;
+            case JD:
+                JdAd.JdInterstitialAd(activity, useOrDefault(interstitialAdId, Id.JdId.INTER_ID));
+                break;
+            case INMOBI:
+                InMobiAd.InMobiInterstitialAd(activity,
+                        parseLongOr(useOrDefault(interstitialAdId, String.valueOf(Id.InMobiId.INTER_ID)), Id.InMobiId.INTER_ID));
+                break;
+            case UMENG:
+                UmengAd.UmengInterstitialAd(activity, useOrDefault(interstitialAdId, Id.UmengId.INTER_ID));
+                break;
+            case QIYI:
+                QiYiAd.QiYiInterstitialAd(activity, useOrDefault(interstitialAdId, Id.QiYiId.INTER_ID));
+                break;
+            default:
+                Log.i("广告", "该平台未实现插屏广告：" + selectedPlatform);
+                InterstitialAdCallback.onInterstitialAdError(activity, -1, "该平台未实现插屏广告：" + selectedPlatform);
+                break;
+        }
+    }
+
+    /**
+     * 加载 Banner（横幅）广告，使用 {@link Id} 中的示例广告位。
+     *
+     * @param bannerAdContainer Banner 容器，SDK 会把广告 View 加入该容器
+     */
+    public static void loadBannerAd(@NonNull Activity activity, @NonNull ViewGroup bannerAdContainer,
+                                    @NonNull AdPlatform selectedPlatform){
+        loadBannerAd(activity, bannerAdContainer, selectedPlatform, null);
+    }
+
+    /**
+     * 加载 Banner（横幅）广告，可自定义广告位 ID。
+     *
+     * 广告 View 由 SDK 自行加入 {@code bannerAdContainer}，渲染完成、失败时分别回调
+     * {@link LocalAdBridge#onBannerAdLoaded} / {@link LocalAdBridge#onBannerAdError}。
+     *
+     * @param bannerAdId Banner 广告位 ID。传 null / 空串时使用 {@link Id} 中的示例值；
+     *                   快手、Taptap、InMobi 的广告位为 long，传入非数字字符串时同样回退到示例值
+     */
+    public static void loadBannerAd(@NonNull Activity activity, @NonNull ViewGroup bannerAdContainer,
+                                    @NonNull AdPlatform selectedPlatform, @Nullable String bannerAdId){
+        if(Boolean.FALSE.equals(Init.adSDKisLoaded.get(selectedPlatform))) {
+            initSDKByAdPlatform(activity, selectedPlatform);
+        }
+        switch (selectedPlatform) {
+            case ADMOB:
+                AdMob.AdMobBannerAd(activity, useOrDefault(bannerAdId, Id.AdMobId.BANNER_ID), bannerAdContainer);
+                break;
+            case CSJ:
+                CsjAd.CsjBannerAd(activity, useOrDefault(bannerAdId, Id.CsjId.BANNER_ID), bannerAdContainer);
+                break;
+            case GDT:
+                GDTAd.GDTBannerAd(activity, useOrDefault(bannerAdId, Id.GDTId.BANNER_ID), bannerAdContainer);
+                break;
+            case HW:
+                HwAd.HwBannerAd(activity, useOrDefault(bannerAdId, Id.HwId.BANNER_ID), bannerAdContainer);
+                break;
+            case KS:
+                KsAd.KsBannerAd(activity, parseLongOr(useOrDefault(bannerAdId, String.valueOf(Id.KsId.BANNER_ID)), Id.KsId.BANNER_ID), bannerAdContainer);
+                break;
+            case MIMO:
+                MimoAd.MimoBannerAd(activity, useOrDefault(bannerAdId, Id.MimoId.BANNER_ID), bannerAdContainer);
+                break;
+            case MS:
+                MsAd.MsBannerAd(activity, useOrDefault(bannerAdId, Id.MSId.BANNER_ID), bannerAdContainer);
+                break;
+            case OCTOPUS:
+                OctopusAd.OctopusBannerAd(activity, useOrDefault(bannerAdId, Id.OctopusId.BANNER_ID), bannerAdContainer);
+                break;
+            case TAPTAP:
+                TaptapAd.TaptapBannerAd(activity,
+                        parseLongOr(useOrDefault(bannerAdId, String.valueOf(Id.TaptapId.horizontal.BANNER_ID)), Id.TaptapId.horizontal.BANNER_ID), bannerAdContainer);
+                break;
+            case OSET:
+                OSETAd.OSETBannerAd(activity, useOrDefault(bannerAdId, Id.OpenSetId.BANNER_ID), bannerAdContainer);
+                break;
+            case QIMING:
+                QiMingAd.QiMingBannerAd(activity, useOrDefault(bannerAdId, Id.QiMingId.BANNER_ID), bannerAdContainer);
+                break;
+            case JD:
+                JdAd.JdBannerAd(activity, useOrDefault(bannerAdId, Id.JdId.BANNER_ID), bannerAdContainer);
+                break;
+            case INMOBI:
+                InMobiAd.InMobiBannerAd(activity,
+                        parseLongOr(useOrDefault(bannerAdId, String.valueOf(Id.InMobiId.BANNER_ID)), Id.InMobiId.BANNER_ID), bannerAdContainer);
+                break;
+            case UMENG:
+                UmengAd.UmengBannerAd(activity, useOrDefault(bannerAdId, Id.UmengId.BANNER_ID), bannerAdContainer);
+                break;
+            case QIYI:
+                QiYiAd.QiYiBannerAd(activity, useOrDefault(bannerAdId, Id.QiYiId.BANNER_ID), bannerAdContainer);
+                break;
+            default:
+                Log.i("广告", "该平台未实现 Banner 广告：" + selectedPlatform);
+                BannerAdCallback.onBannerAdError(activity, -1, "该平台未实现 Banner 广告：" + selectedPlatform);
+                break;
+            // 百度、Sigmob、倍孜、Tanx、新浪移动联盟的 SDK 未提供公开的 Banner 接口
+        }
+    }
+
     /** 使用方传入的 ID 为空时回退到示例值（{@link Id}）。 */
-    @MTProtector
+    
     private static String useOrDefault(@Nullable String value, String sample) {
         return (value == null || value.trim().isEmpty()) ? sample : value.trim();
     }
 
     /** 部分平台（快手、Taptap）的广告位 ID 为 long，传入值非法时回退到示例值。 */
-    @MTProtector
+    
     private static long parseLongOr(String value, long sample) {
         try {
             return Long.parseLong(value);

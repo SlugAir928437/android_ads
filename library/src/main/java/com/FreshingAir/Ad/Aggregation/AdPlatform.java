@@ -1,12 +1,14 @@
 package com.FreshingAir.Ad.Aggregation;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
-@MTProtector
+
+@Keep
 public enum AdPlatform {
     BAIDU,
     ADMOB,
     BEIZI,
     CSJ,
+    /** 广点通，即腾讯优量汇（腾讯广告联盟），SDK 包名为 com.qq.e */
     GDT,
     HW,
     KS,
@@ -21,5 +23,7 @@ public enum AdPlatform {
     TANX,
     INMOBI,
     UMENG,
-    SINA
+    SINA,
+    /** 爱奇艺联盟（iQiYi iadsdk），SDK 包名为 com.mcto.sspsdk */
+    QIYI
 }

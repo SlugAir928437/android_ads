@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import android.app.Activity;
@@ -22,7 +22,7 @@ import com.FreshingAir.Ad.Aggregation.Init;
 
 import java.util.List;
 
-@MTProtector
+
 public class TanxAd {
 
     private static final String TAG = "";
@@ -42,14 +42,14 @@ public class TanxAd {
 
         TanxSdk.init(activity.getApplication(), config, new TanxInitListener() {
             @Override
-            @MTProtector
+            
             public void succ() {
                 Log.e(TAG, "InitListener succ");
                 Init.adSDKisLoaded.put(AdPlatform.TANX, true);
             }
 
             @Override
-            @MTProtector
+            
             public void error(int code, String msg) {
                 Log.e(TAG, "InitListener error:" + msg);
             }
@@ -70,19 +70,19 @@ public class TanxAd {
         ITanxAdLoader iTanxAdLoader = TanxSdk.getSDKManager().createAdLoader(context );
         iTanxAdLoader.loadSplashAd(adSlot, new ITanxAdLoader.OnAdLoadListener<>() {
             @Override
-            @MTProtector
+            
             public void onLoaded(List<ITanxSplashExpressAd> adList) {
                 ITanxSplashExpressAd iTanxSplashExpressAd = adList.get(0);
                 splash_container.addView(iTanxSplashExpressAd.getAdView(), new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 iTanxSplashExpressAd.setOnSplashAdListener(new ITanxSplashExpressAd.OnSplashAdListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onAdRender(ITanxSplashExpressAd splashExpressAd) {
                         //3.2.0版本生效，如有性能要求，可在此方法回调后进行广告addview
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdClicked() {
                         //isAdClicked = true;
                     }
@@ -93,7 +93,7 @@ public class TanxAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdShow() {
 
                     }
@@ -110,7 +110,7 @@ public class TanxAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onShowError(TanxError error) {
                         //goToHomePage();
 
@@ -122,7 +122,7 @@ public class TanxAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onClickCommitSuccess(ITanxAd iTanxAd) {
 
                     }
@@ -136,7 +136,7 @@ public class TanxAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onError(TanxError error) {
                 //goToHomePage();
             }

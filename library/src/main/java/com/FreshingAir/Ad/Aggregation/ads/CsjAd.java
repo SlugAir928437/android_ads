@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import static com.bytedance.sdk.openadsdk.TTAdLoadType.PRELOAD;
@@ -26,10 +26,12 @@ import com.FreshingAir.Ad.Aggregation.AdPlatform;
 import com.FreshingAir.Ad.Aggregation.Init;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.FreshingAir.Ad.Aggregation.SplashAdCallback;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 
 import java.util.List;
 
-@MTProtector
+
 public class CsjAd {
     private static final String TAG = "穿山甲广告 SDK";
     public static void InitCsjSDK(Context context, String appId, String appName) {
@@ -47,7 +49,7 @@ public class CsjAd {
         );
         TTAdSdk.start(new TTAdSdk.Callback() {
             @Override
-            @MTProtector
+            
             public void success() {
                 if(TTAdSdk.isSdkReady()) {
                     Log.i(TAG, "SDK初始化成功");
@@ -92,7 +94,7 @@ public class CsjAd {
 
             //开屏渲染成功，可以展示开屏
             @Override
-            @MTProtector
+            
             public void onSplashRenderSuccess(CSJSplashAd ad) {
                 if (ad == null) {
                     Log.e(TAG, "未获取到广告");
@@ -129,7 +131,7 @@ public class CsjAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onSplashRenderFail(CSJSplashAd ad, CSJAdError csjAdError) {
                 Log.e(TAG, "广告渲染失败，错误信息：" + csjAdError.getMsg() + "(" + csjAdError.getCode() + ")");
                 SplashAdCallback.goToMainActivity(context);
@@ -137,7 +139,7 @@ public class CsjAd {
             }
         }, 5000);
     }
-    @MTProtector
+    
     public static void CsjFeedAd(Context context,String codeId,ViewGroup convertView){
 //创建TTAdNative对象，createAdNative(Context context) context需要传入Activity对象
 //保证每次请求的广告对象为新的广告对象，避免重复使用广告同一个对象进行广告请求
@@ -154,21 +156,21 @@ public class CsjAd {
 
             //广告请求失败
             @Override
-            @MTProtector
+            
             public void onError(int code, String message) {
 
             }
 
             //广告请求成功
             @Override
-            @MTProtector
+            
             public void onNativeExpressAdLoad(List<TTNativeExpressAd> ads) {
                 TTNativeExpressAd mTTAd = ads.get(0);
                 mTTAd.setExpressInteractionListener(new TTNativeExpressAd.ExpressAdInteractionListener() {
 
                     //广告点击回调
                     @Override
-                    @MTProtector
+                    
                     public void onAdClicked(View view, int type) {
 
                     }
@@ -180,14 +182,14 @@ public class CsjAd {
 
                     //广告渲染失败回调
                     @Override
-                    @MTProtector
+                    
                     public void onRenderFail(View view, String msg, int code) {
 
                     }
 
                     //广告渲染成功回调
                     @Override
-                    @MTProtector
+                    
                     public void onRenderSuccess(View view, float width, float height) {
                         // 当前不建议直接使用 float width, float height
                         convertView.addView(view);
@@ -204,7 +206,7 @@ public class CsjAd {
      * @param context 需要是 Activity（展示激励视频依赖 Activity）
      * @param mCodeId 激励视频广告位 ID
      */
-    @MTProtector
+    
     public static void CsjRewardVideoAd(Context context, String mCodeId) {
         TTAdNative mTTAdNative = TTAdSdk.getAdManager().createAdNative(context);
         AdSlot adSlot = new AdSlot.Builder()
@@ -219,7 +221,7 @@ public class CsjAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardVideoAdLoad(TTRewardVideoAd ad) {
                 Log.i(TAG, "激励视频加载成功");
                 RewardVideoAdCallback.onRewardAdLoaded(context);
@@ -237,7 +239,7 @@ public class CsjAd {
         });
     }
 
-    @MTProtector
+    
     private static void showCsjRewardVideoAd(Context context, TTRewardVideoAd ad) {
         if (ad == null) {
             RewardVideoAdCallback.onRewardAdError(context, -1, "未获取到激励视频广告");
@@ -255,7 +257,7 @@ public class CsjAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdClose() {
                 Log.i(TAG, "激励视频关闭");
                 RewardVideoAdCallback.onRewardAdClose(context);
@@ -266,7 +268,7 @@ public class CsjAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onVideoError() {
                 Log.e(TAG, "激励视频播放失败");
                 RewardVideoAdCallback.onRewardAdError(context, -1, "激励视频播放失败");
@@ -279,7 +281,7 @@ public class CsjAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardArrived(boolean isRewardValid, int rewardType, Bundle extraInfo) {
                 if (isRewardValid) {
                     String rewardName = extraInfo != null ? extraInfo.getString(TTRewardVideoAd.REWARD_EXTRA_KEY_REWARD_NAME) : null;
@@ -290,7 +292,7 @@ public class CsjAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onSkippedVideo() {
             }
         });
@@ -299,5 +301,182 @@ public class CsjAd {
         } else {
             RewardVideoAdCallback.onRewardAdError(context, -1, "激励视频展示需要 Activity 上下文");
         }
+    }
+
+    /**
+     * 穿山甲插屏广告（String 广告位）。
+     *
+     * 说明：本版 SDK 的 TTAdNative 没有 loadInteractionExpressAd，
+     * 因此采用 loadNativeExpressAd 加载模板广告，再通过
+     * showInteractionExpressAd(activity) 组合实现插屏展示。
+     *
+     * @param activity 展示插屏所需的 Activity
+     * @param adId     插屏广告位 ID
+     */
+    
+    public static void CsjInterstitialAd(Activity activity, String adId) {
+        if (activity == null) {
+            InterstitialAdCallback.onInterstitialAdError(null, -1, "插屏展示需要 Activity 上下文");
+            return;
+        }
+        if (adId == null || adId.isEmpty()) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "广告位 ID 为空");
+            return;
+        }
+        TTAdNative mTTAdNative = TTAdSdk.getAdManager().createAdNative(activity);
+        AdSlot adSlot = new AdSlot.Builder()
+                .setCodeId(adId)
+                // 插屏模板广告期望尺寸（dp），展示时会以插屏形式全屏呈现
+                .setExpressViewAcceptedSize(600, 600)
+                .setAdLoadType(PRELOAD)
+                .build();
+        mTTAdNative.loadNativeExpressAd(adSlot, new TTAdNative.NativeExpressAdListener() {
+            @Override
+            public void onError(int code, String message) {
+                Log.e(TAG, "插屏广告加载失败，错误信息：" + message + "(" + code + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, code, message);
+            }
+
+            @Override
+            
+            public void onNativeExpressAdLoad(List<TTNativeExpressAd> ads) {
+                if (ads == null || ads.isEmpty()) {
+                    InterstitialAdCallback.onInterstitialAdError(activity, -1, "未获取到插屏广告");
+                    return;
+                }
+                TTNativeExpressAd ad = ads.get(0);
+                ad.setExpressInteractionListener(new TTNativeExpressAd.AdInteractionListener() {
+                    @Override
+                    public void onAdClicked(View view, int type) {
+                    }
+
+                    @Override
+                    
+                    public void onAdShow(View view, int type) {
+                        Log.i(TAG, "插屏广告展示");
+                        InterstitialAdCallback.onInterstitialAdShow(activity);
+                    }
+
+                    @Override
+                    
+                    public void onRenderFail(View view, String msg, int code) {
+                        Log.e(TAG, "插屏广告渲染失败，错误信息：" + msg + "(" + code + ")");
+                        InterstitialAdCallback.onInterstitialAdError(activity, code, msg);
+                    }
+
+                    @Override
+                    
+                    public void onRenderSuccess(View view, float width, float height) {
+                        Log.i(TAG, "插屏广告渲染成功");
+                    }
+
+                    @Override
+                    
+                    public void onAdDismiss() {
+                        Log.i(TAG, "插屏广告关闭");
+                        InterstitialAdCallback.onInterstitialAdClose(activity);
+                    }
+                });
+                // 加载成功后先回调 loaded，随后自动展示
+                InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                ad.render();
+                ad.showInteractionExpressAd(activity);
+            }
+        });
+    }
+
+    /**
+     * 穿山甲插屏广告（long 广告位，内部转换为 String）。
+     */
+    
+    public static void CsjInterstitialAd(Activity activity, long adId) {
+        CsjInterstitialAd(activity, String.valueOf(adId));
+    }
+
+    /**
+     * 穿山甲 Banner 广告（String 广告位）。
+     *
+     * @param activity  展示 Banner 所需的 Activity
+     * @param adId      Banner 广告位 ID
+     * @param container 承载 Banner 的容器，广告渲染完成后会被加入其中
+     */
+    
+    public static void CsjBannerAd(Activity activity, String adId, ViewGroup container) {
+        if (activity == null || container == null) {
+            BannerAdCallback.onBannerAdError(activity, -1, "Banner 展示需要 Activity 与容器");
+            return;
+        }
+        if (adId == null || adId.isEmpty()) {
+            BannerAdCallback.onBannerAdError(activity, -1, "广告位 ID 为空");
+            return;
+        }
+        container.removeAllViews();
+        // 宽度优先取容器宽度（dp），为 0 时退化为屏幕宽度
+        float density = activity.getResources().getDisplayMetrics().density;
+        float widthDp = container.getMeasuredWidth() / density;
+        if (widthDp <= 0) {
+            widthDp = activity.getResources().getDisplayMetrics().widthPixels / density;
+        }
+        TTAdNative mTTAdNative = TTAdSdk.getAdManager().createAdNative(activity);
+        AdSlot adSlot = new AdSlot.Builder()
+                .setCodeId(adId)
+                .setExpressViewAcceptedSize(widthDp, 0)
+                .setAdLoadType(PRELOAD)
+                .build();
+        mTTAdNative.loadBannerExpressAd(adSlot, new TTAdNative.NativeExpressAdListener() {
+            @Override
+            public void onError(int code, String message) {
+                Log.e(TAG, "Banner 广告加载失败，错误信息：" + message + "(" + code + ")");
+                BannerAdCallback.onBannerAdError(activity, code, message);
+            }
+
+            @Override
+            
+            public void onNativeExpressAdLoad(List<TTNativeExpressAd> ads) {
+                if (ads == null || ads.isEmpty()) {
+                    BannerAdCallback.onBannerAdError(activity, -1, "未获取到 Banner 广告");
+                    return;
+                }
+                TTNativeExpressAd ad = ads.get(0);
+                ad.setExpressInteractionListener(new TTNativeExpressAd.AdInteractionListener() {
+                    @Override
+                    public void onAdClicked(View view, int type) {
+                    }
+
+                    @Override
+                    public void onAdShow(View view, int type) {
+                    }
+
+                    @Override
+                    
+                    public void onRenderFail(View view, String msg, int code) {
+                        Log.e(TAG, "Banner 广告渲染失败，错误信息：" + msg + "(" + code + ")");
+                        BannerAdCallback.onBannerAdError(activity, code, msg);
+                    }
+
+                    @Override
+                    
+                    public void onRenderSuccess(View view, float width, float height) {
+                        container.removeAllViews();
+                        container.addView(view);
+                        Log.i(TAG, "Banner 广告渲染成功");
+                        BannerAdCallback.onBannerAdLoaded(activity, container);
+                    }
+
+                    @Override
+                    public void onAdDismiss() {
+                    }
+                });
+                ad.render();
+            }
+        });
+    }
+
+    /**
+     * 穿山甲 Banner 广告（long 广告位，内部转换为 String）。
+     */
+    
+    public static void CsjBannerAd(Activity activity, long adId, ViewGroup container) {
+        CsjBannerAd(activity, String.valueOf(adId), container);
     }
 }

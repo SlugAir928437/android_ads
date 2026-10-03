@@ -9,7 +9,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import com.FreshingAir.Ad.Aggregation.AdPlatform;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 import com.FreshingAir.Ad.Aggregation.Init;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.FreshingAir.Ad.Aggregation.SplashAdCallback;
 import com.umeng.commonsdk.UMConfigure;
@@ -215,5 +217,109 @@ public class UmengAd {
                 RewardVideoAdCallback.onRewardAdError(activity, -1, message);
             }
         });
+    }
+
+    /**
+     * 加载友盟插屏广告并展示（String 广告位）。
+     *
+     * 加载成功、展示、关闭、失败分别回调 {@link InterstitialAdCallback} 对应出口。
+     */
+    public static void UmengInterstitialAd(@NonNull final Activity activity, String slotId) {
+        if (slotId == null || slotId.trim().isEmpty()) {
+            Log.e("UmengAd", "插屏广告位为空：请在友盟后台创建广告位后通过 loadInterstitialAd 的 adId 传入");
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "插屏广告位为空");
+            return;
+        }
+        UMAdConfig adConfig = new UMAdConfig.Builder().setSlotId(slotId).build();
+        // 用 getApi() 的 Load/Show 分离版本，才能拿到加载回执并手动 show
+        UMUnionSdk.getApi().loadInterstitialAd(activity, adConfig,
+                new UMUnionApi.AdLoadListener<UMUnionApi.AdDisplay>() {
+
+                    @Override
+                    public void onSuccess(UMUnionApi.AdType adType, UMUnionApi.AdDisplay adDisplay) {
+                        Log.i("UmengAd", "插屏加载成功:" + adType);
+                        adDisplay.setAdCloseListener(new UMUnionApi.AdCloseListener() {
+                            @Override
+                            public void onClosed(UMUnionApi.AdType adType) {
+                                Log.i("UmengAd", "插屏关闭");
+                                InterstitialAdCallback.onInterstitialAdClose(activity);
+                            }
+                        });
+                        adDisplay.setAdEventListener(new UMUnionApi.AdEventListener() {
+                            @Override
+                            public void onExposed() {
+                                InterstitialAdCallback.onInterstitialAdShow(activity);
+                            }
+
+                            @Override
+                            public void onClicked(View view) {
+                            }
+
+                            @Override
+                            public void onError(int code, String message) {
+                                Log.e("UmengAd", "插屏出错:" + code + " / " + message);
+                                InterstitialAdCallback.onInterstitialAdError(activity, code, message);
+                            }
+                        });
+                        InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                        if (adDisplay.isReady()) {
+                            adDisplay.show(activity);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(UMUnionApi.AdType adType, String message) {
+                        Log.e("UmengAd", "插屏加载失败:" + adType + " / " + message);
+                        InterstitialAdCallback.onInterstitialAdError(activity, -1, message);
+                    }
+                });
+    }
+
+    /** 加载友盟插屏广告并展示（long 广告位，便于与统一入口保持一致）。 */
+    public static void UmengInterstitialAd(@NonNull final Activity activity, long adId) {
+        UmengInterstitialAd(activity, String.valueOf(adId));
+    }
+
+    /**
+     * 加载友盟 Banner（原生横幅）广告并渲染进容器。
+     *
+     * 友盟没有 AdView 式横幅控件，Banner 走「原生横幅」{@link UMUnionSdk#loadNativeBannerAd}，
+     * 与信息流一致：用 {@link UMNativeLayout} + {@link UMNativeAD#bindView} 自行渲染。
+     */
+    public static void UmengBannerAd(@NonNull final Activity activity, String slotId,
+                                     @NonNull final ViewGroup container) {
+        if (slotId == null || slotId.trim().isEmpty()) {
+            Log.e("UmengAd", "Banner 广告位为空：请在友盟后台创建广告位后通过 loadBannerAd 的 adId 传入");
+            BannerAdCallback.onBannerAdError(activity, -1, "Banner 广告位为空");
+            return;
+        }
+        final Context context = container.getContext();
+        UMAdConfig adConfig = new UMAdConfig.Builder().setSlotId(slotId).build();
+        UMUnionSdk.loadNativeBannerAd(adConfig, new UMUnionApi.AdLoadListener<UMNativeAD>() {
+
+            @Override
+            public void onSuccess(UMUnionApi.AdType adType, UMNativeAD nativeAD) {
+                Log.i("UmengAd", "Banner 加载成功:" + adType + " title=" + nativeAD.getTitle());
+                UMNativeLayout nativeLayout = new UMNativeLayout(context);
+                List<View> clickViews = new ArrayList<>();
+                clickViews.add(nativeLayout);
+                nativeAD.bindView(context, nativeLayout, clickViews);
+                container.removeAllViews();
+                container.addView(nativeLayout);
+                BannerAdCallback.onBannerAdLoaded(activity, container);
+            }
+
+            @Override
+            public void onFailure(UMUnionApi.AdType adType, String message) {
+                Log.e("UmengAd", "Banner 加载失败:" + adType + " / " + message);
+                BannerAdCallback.onBannerAdError(activity, -1, message);
+            }
+        });
+    }
+
+    /** 加载友盟 Banner 广告（long 广告位，便于与统一入口保持一致）。 */
+    public static void UmengBannerAd(@NonNull final Activity activity, long adId,
+                                     @NonNull final ViewGroup container) {
+        UmengBannerAd(activity, String.valueOf(adId), container);
     }
 }

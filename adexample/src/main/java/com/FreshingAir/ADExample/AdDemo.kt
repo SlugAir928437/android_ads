@@ -15,7 +15,7 @@ data class PlatformOption(val platform: AdPlatform, val label: String) {
  * 可选范围与 [com.FreshingAir.Ad.Aggregation.loadAdByType] 的分支保持一致：
  * 开屏除 InMobi、新浪移动联盟外都支持（横屏只有米盟、Taptap）；
  * 信息流只有下列平台有实现；
- * 视频广告（激励视频）覆盖 15 家平台，见 [rewardVideoPlatforms]。
+ * 视频广告（激励视频）覆盖 16 家平台，见 [rewardVideoPlatforms]。
  */
 object AdDemo {
 
@@ -28,7 +28,7 @@ object AdDemo {
     /** 支持开屏（竖屏）的平台。 */
     val splashPlatforms: List<PlatformOption> = listOf(
         PlatformOption(AdPlatform.CSJ, "穿山甲"),
-        PlatformOption(AdPlatform.GDT, "广点通"),
+        PlatformOption(AdPlatform.GDT, "优量汇（广点通）"),
         PlatformOption(AdPlatform.BAIDU, "百度"),
         PlatformOption(AdPlatform.KS, "快手"),
         PlatformOption(AdPlatform.SIGMOB, "Sigmob"),
@@ -43,13 +43,14 @@ object AdDemo {
         PlatformOption(AdPlatform.BEIZI, "倍孜"),
         PlatformOption(AdPlatform.ADMOB, "AdMob"),
         PlatformOption(AdPlatform.TANX, "阿里 Tanx"),
-        PlatformOption(AdPlatform.UMENG, "友盟+ U-AppWin")
+        PlatformOption(AdPlatform.UMENG, "友盟+ U-AppWin"),
+        PlatformOption(AdPlatform.QIYI, "爱奇艺联盟")
     )
 
     /** 支持信息流的平台（InMobi、新浪移动联盟只有信息流，没有开屏）。 */
     val feedPlatforms: List<PlatformOption> = listOf(
         PlatformOption(AdPlatform.CSJ, "穿山甲"),
-        PlatformOption(AdPlatform.GDT, "广点通"),
+        PlatformOption(AdPlatform.GDT, "优量汇（广点通）"),
         PlatformOption(AdPlatform.BAIDU, "百度"),
         PlatformOption(AdPlatform.KS, "快手"),
         PlatformOption(AdPlatform.SIGMOB, "Sigmob"),
@@ -58,13 +59,14 @@ object AdDemo {
         PlatformOption(AdPlatform.TAPTAP, "Taptap"),
         PlatformOption(AdPlatform.INMOBI, "InMobi"),
         PlatformOption(AdPlatform.UMENG, "友盟+ U-AppWin"),
-        PlatformOption(AdPlatform.SINA, "新浪移动联盟")
+        PlatformOption(AdPlatform.SINA, "新浪移动联盟"),
+        PlatformOption(AdPlatform.QIYI, "爱奇艺联盟")
     )
 
     /** 支持视频广告（激励视频）的平台。 */
     val rewardVideoPlatforms: List<PlatformOption> = listOf(
         PlatformOption(AdPlatform.CSJ, "穿山甲"),
-        PlatformOption(AdPlatform.GDT, "广点通"),
+        PlatformOption(AdPlatform.GDT, "优量汇（广点通）"),
         PlatformOption(AdPlatform.BAIDU, "百度"),
         PlatformOption(AdPlatform.KS, "快手"),
         PlatformOption(AdPlatform.SIGMOB, "Sigmob"),
@@ -77,7 +79,49 @@ object AdDemo {
         PlatformOption(AdPlatform.BEIZI, "倍孜"),
         PlatformOption(AdPlatform.HW, "华为"),
         PlatformOption(AdPlatform.ADMOB, "AdMob"),
-        PlatformOption(AdPlatform.UMENG, "友盟+ U-AppWin")
+        PlatformOption(AdPlatform.UMENG, "友盟+ U-AppWin"),
+        PlatformOption(AdPlatform.QIYI, "爱奇艺联盟")
+    )
+
+    /** 支持插屏广告的平台（Tanx、新浪移动联盟未提供插屏接口）。 */
+    val interstitialPlatforms: List<PlatformOption> = listOf(
+        PlatformOption(AdPlatform.CSJ, "穿山甲"),
+        PlatformOption(AdPlatform.GDT, "优量汇（广点通）"),
+        PlatformOption(AdPlatform.BAIDU, "百度"),
+        PlatformOption(AdPlatform.KS, "快手"),
+        PlatformOption(AdPlatform.SIGMOB, "Sigmob"),
+        PlatformOption(AdPlatform.MIMO, "米盟"),
+        PlatformOption(AdPlatform.MS, "美数"),
+        PlatformOption(AdPlatform.OCTOPUS, "章鱼"),
+        PlatformOption(AdPlatform.JD, "京东"),
+        PlatformOption(AdPlatform.TAPTAP, "Taptap"),
+        PlatformOption(AdPlatform.OSET, "OSET"),
+        PlatformOption(AdPlatform.QIMING, "启明"),
+        PlatformOption(AdPlatform.HW, "华为"),
+        PlatformOption(AdPlatform.BEIZI, "倍孜"),
+        PlatformOption(AdPlatform.ADMOB, "AdMob"),
+        PlatformOption(AdPlatform.INMOBI, "InMobi"),
+        PlatformOption(AdPlatform.UMENG, "友盟+ U-AppWin"),
+        PlatformOption(AdPlatform.QIYI, "爱奇艺联盟")
+    )
+
+    /** 支持 Banner（横幅）广告的平台（百度、Sigmob、倍孜、Tanx、新浪未提供 Banner 接口）。 */
+    val bannerPlatforms: List<PlatformOption> = listOf(
+        PlatformOption(AdPlatform.CSJ, "穿山甲"),
+        PlatformOption(AdPlatform.GDT, "优量汇（广点通）"),
+        PlatformOption(AdPlatform.KS, "快手"),
+        PlatformOption(AdPlatform.MIMO, "米盟"),
+        PlatformOption(AdPlatform.MS, "美数"),
+        PlatformOption(AdPlatform.OCTOPUS, "章鱼"),
+        PlatformOption(AdPlatform.JD, "京东"),
+        PlatformOption(AdPlatform.TAPTAP, "Taptap"),
+        PlatformOption(AdPlatform.OSET, "OSET"),
+        PlatformOption(AdPlatform.QIMING, "启明"),
+        PlatformOption(AdPlatform.HW, "华为"),
+        PlatformOption(AdPlatform.ADMOB, "AdMob"),
+        PlatformOption(AdPlatform.INMOBI, "InMobi"),
+        PlatformOption(AdPlatform.UMENG, "友盟+ U-AppWin"),
+        PlatformOption(AdPlatform.QIYI, "爱奇艺联盟")
     )
 
     /**

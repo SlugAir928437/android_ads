@@ -1,13 +1,15 @@
 package com.FreshingAir.Ad.Aggregation;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@MTProtector
+
+@Keep
 public class Init {
 
+    @Keep
     public static Map<AdPlatform, Boolean> adSDKisLoaded = new HashMap<>();
 
     static {

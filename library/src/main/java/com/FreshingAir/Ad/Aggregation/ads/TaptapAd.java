@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import android.content.Context;
@@ -13,12 +13,16 @@ import android.util.DisplayMetrics;
 import androidx.annotation.NonNull;
 
 import com.FreshingAir.Ad.Aggregation.AdPlatform;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 import com.FreshingAir.Ad.Aggregation.Init;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.tapsdk.tapad.AdRequest;
 import com.tapsdk.tapad.TapAdManager;
 import com.tapsdk.tapad.TapAdNative;
+import com.tapsdk.tapad.TapBannerAd;
 import com.tapsdk.tapad.TapFeedAd;
+import com.tapsdk.tapad.TapInterstitialAd;
 import com.tapsdk.tapad.TapRewardVideoAd;
 import com.tapsdk.tapad.TapSplashAd;
 import com.tapsdk.tapad.TapAdConfig;
@@ -28,7 +32,7 @@ import com.tapsdk.tapad.feed.FeedOption;
 
 import java.util.List;
 
-@MTProtector
+
 public class TaptapAd {
 
     private static final String TAG = "DirichletAD SDK";
@@ -50,7 +54,7 @@ public class TaptapAd {
 //        TapAdManager.get().requestPermissionIfNecessary(context, true);
         Init.adSDKisLoaded.put(AdPlatform.TAPTAP, true);
     }
-    @MTProtector
+    
     public static void TaptapSplashAd(Context context,long SpaceId,Activity activity,ViewGroup container){
         // 第一步：创建广告加载器
         // 注意：每个页面建议创建独立的TapAdNative实例
@@ -160,7 +164,7 @@ public class TaptapAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onError(int code, String message) {
                 Log.e(TAG, "开屏广告加载失败，错误信息：" + message+"("+code+")");
                 // 根据错误码进行相应处理
@@ -205,7 +209,7 @@ public class TaptapAd {
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void onRenderFail(View view, TapFeedAd tapFeedAd, int i, String s) {
                                 Log.e(TAG,"广告渲染失败，错误信息：" + s + "(" + i + ")");
                             }
@@ -216,20 +220,20 @@ public class TaptapAd {
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void onAdClicked(View view) {
                                 Log.i(TAG,"广告被点击");
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void onAdClosed(View view) {
 
                                 Log.i(TAG,"广告关闭");
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void onAdValidShow(View view) {
                                 Log.i(TAG,"广告有效曝光");
                             }
@@ -238,7 +242,7 @@ public class TaptapAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onError(int code, String message) {
                         // 获取广告失败
                         Log.e(TAG,"获取广告失败，错误信息："+message+"("+code+")");
@@ -253,7 +257,7 @@ public class TaptapAd {
      * @param activity 展示广告的页面
      * @param spaceId  激励视频广告位 ID（long）
      */
-    @MTProtector
+    
     public static void TaptapRewardVideoAd(Activity activity, long spaceId){
         TapAdNative tapAdNative = TapAdManager.get().createAdNative(activity);
         AdRequest adRequest = new AdRequest.Builder()
@@ -261,20 +265,20 @@ public class TaptapAd {
                 .build();
         tapAdNative.loadRewardVideoAd(adRequest, new TapAdNative.RewardVideoAdListener() {
             @Override
-            @MTProtector
+            
             public void onRewardVideoAdLoad(TapRewardVideoAd ad) {
                 Log.i(TAG, "激励视频加载成功");
                 RewardVideoAdCallback.onRewardAdLoaded(activity);
                 ad.setRewardAdInteractionListener(new TapRewardVideoAd.RewardAdInteractionListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onAdShow(TapRewardVideoAd ad) {
                         Log.i(TAG, "激励视频开始播放");
                         RewardVideoAdCallback.onRewardAdShow(activity);
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdClose(TapRewardVideoAd ad) {
                         Log.i(TAG, "激励视频关闭");
                         RewardVideoAdCallback.onRewardAdClose(activity);
@@ -285,14 +289,14 @@ public class TaptapAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoError(TapRewardVideoAd ad) {
                         Log.e(TAG, "激励视频播放失败");
                         RewardVideoAdCallback.onRewardAdError(activity, -1, "激励视频播放失败");
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onRewardVerify(TapRewardVideoAd ad, boolean verify, int amount, String name, int code, String msg) {
                         if (verify) {
                             Log.i(TAG, "激励视频发放奖励：" + name + "x" + amount);
@@ -320,12 +324,179 @@ public class TaptapAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onError(int code, String message) {
                 Log.e(TAG, "激励视频加载失败，错误信息：" + message + "(" + code + ")");
                 RewardVideoAdCallback.onRewardAdError(activity, code, message);
             }
         });
+    }
+
+    /**
+     * 加载并展示 Taptap 插屏广告（加载成功后自动展示）。
+     *
+     * @param activity 展示广告的页面
+     * @param spaceId  插屏广告位 ID（long）
+     */
+    
+    public static void TaptapInterstitialAd(Activity activity, long spaceId) {
+        if (activity == null || spaceId <= 0) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "参数非法（Activity 为空或广告位非法）");
+            return;
+        }
+        TapAdNative tapAdNative = TapAdManager.get().createAdNative(activity);
+        DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
+        AdRequest adRequest = new AdRequest.Builder()
+                .withSpaceId(spaceId)
+                .withExpressViewAcceptedSize(displayMetrics.widthPixels, displayMetrics.heightPixels)
+                .build();
+        tapAdNative.loadInterstitialAd(adRequest, new TapAdNative.InterstitialAdListener() {
+            @Override
+            public void onInterstitialAdLoad(TapInterstitialAd ad) {
+                Log.i(TAG, "插屏广告加载成功");
+                InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                if (ad == null) {
+                    InterstitialAdCallback.onInterstitialAdError(activity, -1, "插屏广告数据为空");
+                    return;
+                }
+                ad.setInteractionListener(new TapInterstitialAd.InterstitialAdInteractionListener() {
+                    @Override
+                    
+                    public void onAdShow() {
+                        Log.i(TAG, "插屏广告展示");
+                        InterstitialAdCallback.onInterstitialAdShow(activity);
+                    }
+
+                    @Override
+                    
+                    public void onAdClose() {
+                        Log.i(TAG, "插屏广告关闭");
+                        InterstitialAdCallback.onInterstitialAdClose(activity);
+                    }
+
+                    @Override
+                    
+                    public void onAdError() {
+                        Log.e(TAG, "插屏广告展示失败");
+                        InterstitialAdCallback.onInterstitialAdError(activity, -1, "插屏广告展示失败");
+                    }
+
+                    @Override
+                    public void onAdValidShow() {
+                    }
+
+                    @Override
+                    public void onAdClick() {
+                    }
+                });
+                ad.show(activity);
+            }
+
+            @Override
+            
+            public void onError(int code, String message) {
+                Log.e(TAG, "插屏广告加载失败，错误信息：" + message + "(" + code + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, code, message);
+            }
+        });
+    }
+
+    /**
+     * 加载并展示 Taptap 插屏广告（广告位为 String 时的便捷重载）。
+     */
+    public static void TaptapInterstitialAd(Activity activity, String adId) {
+        long spaceId;
+        try {
+            spaceId = Long.parseLong(adId);
+        } catch (Exception e) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "广告位不是合法的 long：" + adId);
+            return;
+        }
+        TaptapInterstitialAd(activity, spaceId);
+    }
+
+    /**
+     * 加载并展示 Taptap Banner 广告。
+     *
+     * @param activity  展示广告的页面
+     * @param spaceId   Banner 广告位 ID（long）
+     * @param container 承载广告 View 的容器
+     */
+    
+    public static void TaptapBannerAd(Activity activity, long spaceId, @NonNull ViewGroup container) {
+        if (activity == null || container == null || spaceId <= 0) {
+            BannerAdCallback.onBannerAdError(activity, -1, "参数非法（Activity/容器为空或广告位非法）");
+            return;
+        }
+        container.removeAllViews();
+        TapAdNative tapAdNative = TapAdManager.get().createAdNative(activity);
+        DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
+        int width = container.getMeasuredWidth() > 0 ? container.getMeasuredWidth() : displayMetrics.widthPixels;
+        int height = container.getMeasuredHeight() > 0 ? container.getMeasuredHeight() : (int) (80 * displayMetrics.density);
+        AdRequest adRequest = new AdRequest.Builder()
+                .withSpaceId(spaceId)
+                .withExpressViewAcceptedSize(width, height)
+                .build();
+        tapAdNative.loadBannerAd(adRequest, new TapAdNative.BannerAdListener() {
+            @Override
+            public void onBannerAdLoad(TapBannerAd ad) {
+                Log.i(TAG, "Banner广告加载成功");
+                if (ad == null) {
+                    BannerAdCallback.onBannerAdError(activity, -1, "Banner广告数据为空");
+                    return;
+                }
+                ad.setBannerInteractionListener(new TapBannerAd.BannerInteractionListener() {
+                    @Override
+                    public void onAdShow() {
+                        Log.i(TAG, "Banner广告展示");
+                    }
+
+                    @Override
+                    public void onAdClose() {
+                        Log.i(TAG, "Banner广告关闭");
+                    }
+
+                    @Override
+                    public void onAdClick() {
+                        Log.i(TAG, "Banner广告被点击");
+                    }
+
+                    @Override
+                    public void onAdValidShow() {
+                    }
+                });
+                // 该 SDK 的 show(Activity,int,int) 两个 int 语义不明确，此处仅使用 getBannerView() 挂载
+                View bannerView = ad.getBannerView();
+                if (bannerView == null) {
+                    BannerAdCallback.onBannerAdError(activity, -1, "Banner广告视图为空");
+                    return;
+                }
+                container.removeAllViews();
+                container.addView(bannerView);
+                BannerAdCallback.onBannerAdLoaded(activity, container);
+            }
+
+            @Override
+            
+            public void onError(int code, String message) {
+                Log.e(TAG, "Banner广告加载失败，错误信息：" + message + "(" + code + ")");
+                BannerAdCallback.onBannerAdError(activity, code, message);
+            }
+        });
+    }
+
+    /**
+     * 加载并展示 Taptap Banner 广告（广告位为 String 时的便捷重载）。
+     */
+    public static void TaptapBannerAd(Activity activity, String adId, @NonNull ViewGroup container) {
+        long spaceId;
+        try {
+            spaceId = Long.parseLong(adId);
+        } catch (Exception e) {
+            BannerAdCallback.onBannerAdError(activity, -1, "广告位不是合法的 long：" + adId);
+            return;
+        }
+        TaptapBannerAd(activity, spaceId, container);
     }
 
 }

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  全广告页布局：只保留广告容器，不放按钮、日志面板等任何业务 UI。
+
+  容器说明：
+  - feedAdContainer   信息流广告容器（SDK 会把广告 View 渲染进该容器）
+  - bannerAdContainer Banner（横幅）广告容器（SDK 会把广告 View 加入该容器）
+  - splashAdContainer 开屏广告容器（全屏覆盖层）；华为（HW）平台要求容器为
+                      com.huawei.hms.ads.splash.SplashView，页面会临时 inflate
+                      layout/ad_splash_hw.xml 后加入本容器。
+
+  插屏（Interstitial）与视频广告（激励视频）由 SDK 全屏展示，不需要容器，故不在此声明。
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/allAdsRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_background">
+
+    <!-- 非全屏广告容器：信息流 + Banner，纵向排列并可滚动 -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <!-- 信息流广告容器 -->
+            <FrameLayout
+                android:id="@+id/feedAdContainer"
+                android:layout_width="match_parent"
+                android:layout_height="360dp"
+                android:background="@drawable/bg_ad_placeholder" />
+
+            <!-- Banner（横幅）广告容器 -->
+            <FrameLayout
+                android:id="@+id/bannerAdContainer"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_ad_placeholder" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- 开屏广告容器：全屏覆盖，默认隐藏，开屏广告渲染时显示 -->
+    <FrameLayout
+        android:id="@+id/splashAdContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/splash_background"
+        android:visibility="gone" />
+
+</FrameLayout>

@@ -33,6 +33,12 @@
             android:exported="false"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- 全广告页：进入即按 SDK 轮流加载所有形式的广告，页面只保留广告容器 -->
+        <activity
+            android:name=".AllAdsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|uiMode"
+            android:exported="false" />
     </application>
 
 </manifest>

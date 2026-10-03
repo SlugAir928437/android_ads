@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import android.content.Context;
@@ -14,10 +14,16 @@ import com.FreshingAir.Ad.Aggregation.AdPlatform;
 import com.FreshingAir.Ad.Aggregation.Init;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.FreshingAir.Ad.Aggregation.SplashAdCallback;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 import com.qq.e.ads.nativ.ADSize;
 import com.qq.e.ads.nativ.NativeExpressAD;
 import com.qq.e.ads.nativ.NativeExpressADView;
 import com.qq.e.ads.nativ.NativeExpressMediaListener;
+import com.qq.e.ads.interstitial2.UnifiedInterstitialAD;
+import com.qq.e.ads.interstitial2.UnifiedInterstitialADListener;
+import com.qq.e.ads.banner2.UnifiedBannerView;
+import com.qq.e.ads.banner2.UnifiedBannerADListener;
 import com.qq.e.ads.rewardvideo.RewardVideoAD;
 import com.qq.e.ads.rewardvideo.RewardVideoADListener;
 import com.qq.e.ads.splash.SplashAD;
@@ -31,7 +37,15 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
-@MTProtector
+
+/**
+ * 广点通广告实现。
+ *
+ * <p>广点通即腾讯优量汇（腾讯广告联盟），两者是同一平台、同一套 SDK：包名为
+ * {@code com.qq.e}，本地 AAR 为 {@code GDTSDK.unionNormal.*.aar}。
+ * 因此本工程不单独提供“优量汇”实现类，接入优量汇时直接使用本类与
+ * {@link AdPlatform#GDT}。</p>
+ */
 public class GDTAd {
     private static final String TAG = "广点通广告 SDK";
     public static void InitGDTSDK(Context context, String appId){
@@ -39,7 +53,7 @@ public class GDTAd {
         // 调用initWithoutStart后请尽快调用start，否则可能影响广告填充，造成收入下降
         GDTAdSdk.start(new GDTAdSdk.OnStartListener() {
             @Override
-            @MTProtector
+            
             public void onStartSuccess() {
                 // 推荐开发者在onStartSuccess回调后开始拉广告
                 Log.i(TAG, "SDK初始化成功");
@@ -52,19 +66,19 @@ public class GDTAd {
             }
         });
     }
-    @MTProtector
+    
     public static void GDTSplashAd(Context context,String posId,ViewGroup container){
         // 创建开屏广告实例
         SplashAD splashAD = new SplashAD(context, posId,  new SplashADListener() {
             @Override
-            @MTProtector
+            
             public void onADDismissed() {
                 // 广告关闭，进入主界面
                 Log.i(TAG, "广告关闭");
                 SplashAdCallback.goToMainActivity(context);
             }
             @Override
-            @MTProtector
+            
             public void onNoAD(com.qq.e.comm.util.AdError adError) {
                 // 广告加载失败，也进入主界面
                 Log.e(TAG, "广告加载失败，错误信息：" + adError.getErrorMsg() + "(" + adError.getErrorCode() + ")");
@@ -76,7 +90,7 @@ public class GDTAd {
                 Log.i(TAG, "广告成功展示");
             }
             @Override
-            @MTProtector
+            
             public void onADClicked() {
                 // 广告被点击
                 Log.i(TAG, "用户点击了广告");
@@ -86,7 +100,7 @@ public class GDTAd {
 
             }
             @Override
-            @MTProtector
+            
             public void onADExposure() {
                 // 广告曝光
                 Log.i(TAG, "广告曝光");
@@ -108,18 +122,18 @@ public class GDTAd {
         adContainer.removeAllViews();
         NativeExpressAD nativeExpressAD = new NativeExpressAD(context, new ADSize(ADSize.FULL_WIDTH, ADSize.AUTO_HEIGHT), posID, new NativeExpressAD.NativeExpressADListener() {
             @Override
-            @MTProtector
+            
             public void onADLoaded(List<NativeExpressADView> list) {
                 NativeExpressADView nativeExpressADView = list.get(0);
                 nativeExpressADView.setMediaListener(new NativeExpressMediaListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onVideoInit(NativeExpressADView nativeExpressADView) {
                         Log.i(TAG,"视频初始化");
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoLoading(NativeExpressADView nativeExpressADView) {
                         Log.i(TAG,"视频正在加载");
                     }
@@ -130,7 +144,7 @@ public class GDTAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoReady(NativeExpressADView nativeExpressADView, long l) {
                         Log.i(TAG,"视频已准备好");
                         nativeExpressADView.render();
@@ -156,7 +170,7 @@ public class GDTAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoError(NativeExpressADView nativeExpressADView, AdError adError) {
                         Log.e(TAG,"视频播放失败，错误信息："+adError.getErrorMsg()+"("+adError.getErrorCode()+")");
                         nativeExpressADView.destroy();
@@ -164,13 +178,13 @@ public class GDTAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoPageOpen(NativeExpressADView nativeExpressADView) {
                         Log.i(TAG,"视频详情页打开");
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoPageClose(NativeExpressADView nativeExpressADView) {
                         Log.i(TAG,"视频详情页关闭");
                     }
@@ -186,7 +200,7 @@ public class GDTAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRenderSuccess(NativeExpressADView nativeExpressADView) {
                 Log.i(TAG,"广告渲染成功");
             }
@@ -214,7 +228,7 @@ public class GDTAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onNoAD(AdError adError) {
                 Log.i(TAG,"广告加载失败，错误信息："+adError.getErrorMsg()+"("+adError.getErrorCode()+")");
                 videoView.start();
@@ -240,7 +254,7 @@ public class GDTAd {
                 if (nativeExpressADView.getBoundData().getAdPatternType() == AdPatternType.NATIVE_VIDEO) {
                     nativeExpressADView.setMediaListener(new NativeExpressMediaListener() {
                         @Override
-                        @MTProtector
+                        
                         public void onVideoInit(NativeExpressADView nativeExpressADView) {
                             Log.i(TAG, "视频初始化");
                         }
@@ -266,7 +280,7 @@ public class GDTAd {
                         }
 
                         @Override
-                        @MTProtector
+                        
                         public void onVideoPause(NativeExpressADView nativeExpressADView) {
                             Log.i(TAG, "视频暂停");
                         }
@@ -287,7 +301,7 @@ public class GDTAd {
                         }
 
                         @Override
-                        @MTProtector
+                        
                         public void onVideoPageClose(NativeExpressADView nativeExpressADView) {
 
                         }
@@ -303,7 +317,7 @@ public class GDTAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRenderFail(NativeExpressADView nativeExpressADView) {
                 nativeExpressADView.destroy();
             }
@@ -335,7 +349,7 @@ public class GDTAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onNoAD(AdError adError) {
                 Log.e(TAG, "广告加载失败，错误信息："+adError.getErrorMsg()+"("+adError.getErrorCode()+")");
             }
@@ -349,7 +363,7 @@ public class GDTAd {
      * @param context 需要是 Activity（激励视频展示依赖 Activity）
      * @param posId   激励视频广告位 ID
      */
-    @MTProtector
+    
     public static void GDTRewardVideoAd(Context context, String posId) {
         Activity activity = context instanceof Activity ? (Activity) context : null;
         if (activity == null) {
@@ -359,7 +373,7 @@ public class GDTAd {
         final RewardVideoAD[] holder = new RewardVideoAD[1];
         RewardVideoAD rewardVideoAD = new RewardVideoAD(context, posId, new RewardVideoADListener() {
             @Override
-            @MTProtector
+            
             public void onADLoad() {
                 Log.i(TAG, "激励视频加载成功");
                 RewardVideoAdCallback.onRewardAdLoaded(context);
@@ -373,7 +387,7 @@ public class GDTAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onADShow() {
                 Log.i(TAG, "激励视频开始播放");
                 RewardVideoAdCallback.onRewardAdShow(context);
@@ -384,7 +398,7 @@ public class GDTAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onReward(Map<String, Object> map) {
                 Log.i(TAG, "激励视频发放奖励");
                 RewardVideoAdCallback.onRewardAdRewarded(context, null, 0);
@@ -399,14 +413,14 @@ public class GDTAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onADClose() {
                 Log.i(TAG, "激励视频关闭");
                 RewardVideoAdCallback.onRewardAdClose(context);
             }
 
             @Override
-            @MTProtector
+            
             public void onError(AdError adError) {
                 int code = adError != null ? adError.getErrorCode() : 0;
                 String msg = adError != null ? adError.getErrorMsg() : null;
@@ -416,5 +430,142 @@ public class GDTAd {
         });
         holder[0] = rewardVideoAD;
         rewardVideoAD.loadAD();
+    }
+
+    /**
+     * 广点通插屏广告（String 广告位）。
+     */
+    
+    public static void GDTInterstitialAd(Activity activity, String adId) {
+        if (activity == null) {
+            InterstitialAdCallback.onInterstitialAdError(null, -1, "插屏展示需要 Activity 上下文");
+            return;
+        }
+        if (adId == null || adId.isEmpty()) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "广告位 ID 为空");
+            return;
+        }
+        final UnifiedInterstitialAD[] holder = new UnifiedInterstitialAD[1];
+        UnifiedInterstitialAD ad = new UnifiedInterstitialAD(activity, adId, new UnifiedInterstitialADListener() {
+            @Override
+            public void onADReceive() {
+                Log.i(TAG, "插屏广告加载成功");
+                InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                if (holder[0] != null) {
+                    holder[0].show(activity);
+                }
+            }
+
+            @Override
+            public void onNoAD(AdError adError) {
+                int code = adError != null ? adError.getErrorCode() : 0;
+                String msg = adError != null ? adError.getErrorMsg() : null;
+                Log.e(TAG, "插屏广告加载失败，错误信息：" + msg + "(" + code + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, code, msg);
+            }
+
+            @Override
+            public void onADExposure() {
+                Log.i(TAG, "插屏广告展示");
+                InterstitialAdCallback.onInterstitialAdShow(activity);
+            }
+
+            @Override
+            public void onADClicked() {
+            }
+
+            @Override
+            public void onADClosed() {
+                Log.i(TAG, "插屏广告关闭");
+                InterstitialAdCallback.onInterstitialAdClose(activity);
+            }
+
+            @Override
+            public void onVideoCached() {
+            }
+
+            @Override
+            public void onADOpened() {
+            }
+
+            @Override
+            public void onADLeftApplication() {
+            }
+
+            @Override
+            public void onRenderSuccess() {
+            }
+
+            @Override
+            public void onRenderFail() {
+            }
+        });
+        holder[0] = ad;
+        ad.loadAD();
+    }
+
+    /**
+     * 广点通插屏广告（long 广告位，内部转换为 String）。
+     */
+    
+    public static void GDTInterstitialAd(Activity activity, long adId) {
+        GDTInterstitialAd(activity, String.valueOf(adId));
+    }
+
+    /**
+     * 广点通 Banner 广告（String 广告位），广告 View 由 UnifiedBannerView 自身承载。
+     */
+    
+    public static void GDTBannerAd(Activity activity, String adId, ViewGroup container) {
+        if (activity == null || container == null) {
+            BannerAdCallback.onBannerAdError(activity, -1, "Banner 展示需要 Activity 与容器");
+            return;
+        }
+        if (adId == null || adId.isEmpty()) {
+            BannerAdCallback.onBannerAdError(activity, -1, "广告位 ID 为空");
+            return;
+        }
+        container.removeAllViews();
+        UnifiedBannerView banner = new UnifiedBannerView(activity, adId, new UnifiedBannerADListener() {
+            @Override
+            public void onNoAD(AdError adError) {
+                int code = adError != null ? adError.getErrorCode() : 0;
+                String msg = adError != null ? adError.getErrorMsg() : null;
+                Log.e(TAG, "Banner 广告加载失败，错误信息：" + msg + "(" + code + ")");
+                BannerAdCallback.onBannerAdError(activity, code, msg);
+            }
+
+            @Override
+            public void onADReceive() {
+                Log.i(TAG, "Banner 广告加载成功");
+                BannerAdCallback.onBannerAdLoaded(activity, container);
+            }
+
+            @Override
+            public void onADExposure() {
+            }
+
+            @Override
+            public void onADClosed() {
+            }
+
+            @Override
+            public void onADClicked() {
+            }
+
+            @Override
+            public void onADLeftApplication() {
+            }
+        });
+        container.addView(banner);
+        banner.loadAD();
+    }
+
+    /**
+     * 广点通 Banner 广告（long 广告位，内部转换为 String）。
+     */
+    
+    public static void GDTBannerAd(Activity activity, long adId, ViewGroup container) {
+        GDTBannerAd(activity, String.valueOf(adId), container);
     }
 }

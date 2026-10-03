@@ -157,6 +157,11 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <!--新浪移动联盟 End-->
 
+        <!--爱奇艺联盟（iQiYi iadsdk）：AAR 自带清单已声明各广告 Activity、QyFileProvider
+            （authorities=${applicationId}.qy.fileprovider）、模拟器检测 Service 及所需权限，
+            此处无需重复声明，仅保留说明；SDK 下载类广告依赖 usesCleartextTraffic（见 application 标签）-->
+        <!--爱奇艺联盟 End-->
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider;${applicationId}.fileProvider"

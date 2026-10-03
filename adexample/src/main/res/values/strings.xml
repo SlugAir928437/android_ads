@@ -7,7 +7,7 @@
     <string name="splash_skip">跳过</string>
 
     <!-- 主页 -->
-    <string name="main_tip">选择平台后发起请求。开屏广告会进入独立页面，广告结束（或超时）后自动回到本页，可在下方日志查看回调时序。</string>
+    <string name="main_tip">选择平台后发起请求。开屏广告会进入独立页面，广告结束（或超时）后自动回到本页；插屏与激励视频加载成功后自动展示；Banner 会渲染进页面容器。所有回调都可在下方日志查看。</string>
     <string name="main_platform_label">目标平台</string>
     <string name="main_splash_title">开屏广告</string>
     <string name="main_splash_hint">容器为普通 FrameLayout；华为（HW）必须使用 SplashView 容器，示例会自动切换，无需手动处理。</string>
@@ -16,9 +16,21 @@
     <string name="main_feed_hint">容器宽度需占满屏幕，部分平台会按容器宽度请求素材。</string>
     <string name="main_feed_action">加载信息流广告</string>
     <string name="main_feed_clear">清空</string>
+    <string name="main_interstitial_title">插屏广告</string>
+    <string name="main_interstitial_hint">加载成功后自动全屏展示；加载、展示、关闭、失败都会回调到日志区。Tanx 与新浪移动联盟未提供插屏接口。</string>
+    <string name="main_interstitial_action">加载插屏广告</string>
+    <string name="main_banner_title">Banner 广告（横幅）</string>
+    <string name="main_banner_hint">广告 View 由 SDK 自行加入下方容器；百度、Sigmob、倍孜、Tanx、新浪移动联盟未提供 Banner 接口。</string>
+    <string name="main_banner_action">加载 Banner 广告</string>
+    <string name="main_banner_clear">清空</string>
     <string name="main_video_title">视频广告（激励视频）</string>
     <string name="main_video_hint">加载成功后自动全屏播放；看完发放奖励，关闭或失败也会回调到日志区。</string>
     <string name="main_video_action">加载视频广告</string>
     <string name="main_log_title">运行日志</string>
     <string name="main_log_clear">清空日志</string>
+
+    <!-- 全广告页入口 -->
+    <string name="main_all_ads_title">全部广告形式</string>
+    <string name="main_all_ads_hint">进入新页面后自动加载开屏、信息流、插屏、Banner 与视频广告；各 SDK 轮流请求（逐个派发），避免请求过于频繁。页面只保留广告容器。</string>
+    <string name="main_all_ads_action">进入全广告页</string>
 </resources>

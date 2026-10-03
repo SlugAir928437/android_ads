@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import android.content.ComponentName;
@@ -11,7 +11,7 @@ import android.util.Log;
 
 import com.huawei.hms.ads.ExSplashService;
 
-@MTProtector
+
 public final class Hw_ExSplashServiceConnection implements ServiceConnection {
     private static final String TAG = "ExSplashServiceConnection";
 
@@ -22,7 +22,7 @@ public final class Hw_ExSplashServiceConnection implements ServiceConnection {
     }
 
     @Override
-    @MTProtector
+    
     public void onServiceConnected(ComponentName name, IBinder service) {
         Log.i(TAG, "onServiceConnected");
         ExSplashService exSplashService = ExSplashService.Stub.asInterface(service);

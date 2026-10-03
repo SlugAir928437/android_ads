@@ -1,11 +1,12 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 
 import android.text.TextUtils;
 import android.util.Log;
 import com.FreshingAir.Ad.Aggregation.BuildConfig;
 import android.content.Context;
+import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,15 +31,17 @@ import com.FreshingAir.Ad.Aggregation.Init;
 import com.FreshingAir.Ad.Aggregation.R;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.FreshingAir.Ad.Aggregation.SplashAdCallback;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@MTProtector
+
 public class BaiduAd {
 
     public static String TAG = "白青藤广告 SDK";
-    @MTProtector
+    
     public static void InitBaiduSDK(Context context, String Appsid) {
         BDAdConfig bdAdConfig = new BDAdConfig.Builder()
                 // 1、设置app名称，可选
@@ -73,7 +76,7 @@ public class BaiduAd {
         MobadsPermissionSettings.setPermissionLocation(true);
         MobadsPermissionSettings.setPermissionStorage(true);
     }
-    @MTProtector
+    
     public static void BaiduSplashAd(Context context, String adPlaceId, ViewGroup viewGroup){
         SplashAd mSplashAd = new SplashAd(context, adPlaceId, new SplashInteractionListener() {
             @Override
@@ -82,7 +85,7 @@ public class BaiduAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdPresent() {
                 Log.i(TAG, "广告成功展示");
             }
@@ -98,7 +101,7 @@ public class BaiduAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdCacheSuccess() {
 
             }
@@ -120,7 +123,7 @@ public class BaiduAd {
                 SplashAdCallback.goToMainActivity(context);
             }
             @Override
-            @MTProtector
+            
             public void onADLoaded() {
                 Log.i(TAG, "广告加载成功");
             }
@@ -221,7 +224,7 @@ public class BaiduAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onADExposed() {
                         Log.i("百青藤广告 SDK","广告曝光");
                         //SplashAdCallback.onAdLoaded(clickViews);
@@ -234,7 +237,7 @@ public class BaiduAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onADStatusChanged() {
 
                     }
@@ -262,7 +265,7 @@ public class BaiduAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onVideoDownloadSuccess() {
                 Log.i("百青藤广告 SDK","视频物料下载成功");
             }
@@ -279,72 +282,128 @@ public class BaiduAd {
             }
         });
     }
-    @MTProtector
+    
     public static void BaiduExpressInterstitialAd(Context context, String adPlaceId){
-        ExpressInterstitialAd expressInterstitialAd = new ExpressInterstitialAd(context,adPlaceId){};
+        // 兼容旧入口：统一转发到新的插屏契约方法
+        Activity activity = context instanceof Activity ? (Activity) context : null;
+        if (activity == null) {
+            InterstitialAdCallback.onInterstitialAdError(context, -1, "插屏展示需要 Activity 上下文");
+            return;
+        }
+        BaiduInterstitialAd(activity, adPlaceId);
+    }
+
+    /**
+     * 百度插屏广告（String 广告位）。
+     * 加载成功后回调 loaded，并自动调用 show(activity) 展示。
+     *
+     * @param activity 展示插屏所需的 Activity
+     * @param adId     插屏广告位 ID
+     */
+    
+    public static void BaiduInterstitialAd(Activity activity, String adId) {
+        if (activity == null) {
+            InterstitialAdCallback.onInterstitialAdError(null, -1, "插屏展示需要 Activity 上下文");
+            return;
+        }
+        if (TextUtils.isEmpty(adId)) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "广告位 ID 为空");
+            return;
+        }
+        final ExpressInterstitialAd[] holder = new ExpressInterstitialAd[1];
+        ExpressInterstitialAd expressInterstitialAd = new ExpressInterstitialAd(activity, adId);
         expressInterstitialAd.setLoadListener(new ExpressInterstitialListener() {
             @Override
             public void onADLoaded() {
-
+                Log.i(TAG, "插屏广告加载成功");
+                InterstitialAdCallback.onInterstitialAdLoaded(activity);
+                if (holder[0] != null) {
+                    holder[0].show(activity);
+                }
             }
 
             @Override
             public void onAdClick() {
-
             }
 
             @Override
             public void onAdClose() {
-
+                Log.i(TAG, "插屏广告关闭");
+                InterstitialAdCallback.onInterstitialAdClose(activity);
             }
 
             @Override
-            @MTProtector
+            
             public void onAdFailed(int i, String s) {
-
+                Log.e(TAG, "插屏广告加载失败，错误信息：" + s + "(" + i + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, i, s);
             }
 
             @Override
-            @MTProtector
+            
             public void onNoAd(int i, String s) {
-
+                Log.e(TAG, "没有插屏广告返回，错误信息：" + s + "(" + i + ")");
+                InterstitialAdCallback.onInterstitialAdError(activity, i, s);
             }
 
             @Override
             public void onADExposed() {
+                Log.i(TAG, "插屏广告展示");
+                InterstitialAdCallback.onInterstitialAdShow(activity);
             }
 
             @Override
-            @MTProtector
+            
             public void onADExposureFailed() {
-
             }
 
             @Override
             public void onAdCacheSuccess() {
-
             }
 
             @Override
             public void onAdCacheFailed() {
-
             }
 
             @Override
-            @MTProtector
+            
             public void onLpClosed() {
-
             }
         });
+        holder[0] = expressInterstitialAd;
         expressInterstitialAd.load();
-        expressInterstitialAd.show();
     }
-    @MTProtector
+
+    /**
+     * 百度插屏广告（long 广告位，内部转换为 String）。
+     */
+    
+    public static void BaiduInterstitialAd(Activity activity, long adId) {
+        BaiduInterstitialAd(activity, String.valueOf(adId));
+    }
+
+    /**
+     * 百度 SDK 未提供 Banner 公开 API，直接回调错误，不抛异常。
+     */
+    
+    public static void BaiduBannerAd(Activity activity, String adId, ViewGroup container) {
+        Log.e(TAG, "百度 SDK 无 Banner 公开 API，不支持 Banner 广告");
+        BannerAdCallback.onBannerAdError(activity, -1, "百度 SDK 不支持 Banner 广告");
+    }
+
+    /**
+     * 百度 Banner（long 广告位），同样不支持，直接回调错误。
+     */
+    
+    public static void BaiduBannerAd(Activity activity, long adId, ViewGroup container) {
+        BaiduBannerAd(activity, String.valueOf(adId), container);
+    }
+    
     public static void BaiduRewardVideoAd(Context context, String adPlaceId){
         final RewardVideoAd[] holder = new RewardVideoAd[1];
         RewardVideoAd rewardVideoAd = new RewardVideoAd(context, adPlaceId, new RewardVideoAd.RewardVideoAdListener() {
             @Override
-            @MTProtector
+            
             public void onAdShow() {
                 Log.i(TAG, "激励视频开始播放");
                 RewardVideoAdCallback.onRewardAdShow(context);
@@ -356,14 +415,14 @@ public class BaiduAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdClose(float v) {
                 Log.i(TAG, "激励视频关闭");
                 RewardVideoAdCallback.onRewardAdClose(context);
             }
 
             @Override
-            @MTProtector
+            
             public void onAdFailed(String s) {
                 Log.e(TAG, "激励视频加载失败，错误信息：" + s);
                 RewardVideoAdCallback.onRewardAdError(context, 0, s);
@@ -375,13 +434,13 @@ public class BaiduAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onVideoDownloadFailed() {
 
             }
 
             @Override
-            @MTProtector
+            
             public void playCompletion() {
 
             }
@@ -397,13 +456,13 @@ public class BaiduAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdSkip(float v) {
 
             }
 
             @Override
-            @MTProtector
+            
             public void onRewardVerify(boolean rewardVerify) {
                 if (rewardVerify) {
                     Log.i(TAG, "激励视频发放奖励");

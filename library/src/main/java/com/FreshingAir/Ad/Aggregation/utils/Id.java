@@ -1,6 +1,8 @@
 package com.FreshingAir.Ad.Aggregation.utils;
 
+import androidx.annotation.Keep;
 
+@Keep
 public class Id {
 
     // 广告位ID均为开放平台给出的测试ID
@@ -28,6 +30,8 @@ public class Id {
     public static class BeiziId{
         public static String SPLASH_ID = "104835";
         public static String REWARD_ID = "103226";
+        // 插屏：倍孜未提供公共测试广告位，需在倍孜后台创建后传入
+        public static String INTER_ID = "";
     }
     
     public static class CsjId{
@@ -95,6 +99,8 @@ public class Id {
         public static long INTER_ID = 90009002L;
         public static long REWARD_ID = 90009001L;
         public static long FULL_VIDEO_ID = 90009002L;
+        // Banner：快手未给出公共测试位，此值为占位示例，上线前需替换为正式广告位
+        public static long BANNER_ID = 90009004L;
     }
     
     public static class SigmobId{
@@ -113,6 +119,9 @@ public class Id {
         public static String SPLASH_ID = "94f4805a2d50ba6e853340f9035fda18";
         // 激励视频：米盟未提供公共测试广告位，需在米盟后台创建后传入
         public static String REWARD_ID = "";
+        // 插屏 / Banner：米盟未提供公共测试广告位，需在米盟后台创建后传入
+        public static String INTER_ID = "";
+        public static String BANNER_ID = "";
     }
     
     public static class MSId{
@@ -121,6 +130,8 @@ public class Id {
         public static String REWARD_ID = "1063887";
         public static String FULL_VIDEO_ID = "1063887";
         public static String INTER_ID = "1063886";
+        //Banner 横幅广告（需在美数后台创建后传入）
+        public static String BANNER_ID = "";
         //原生信息流广告
         public static String FEED_ID = "1063888";
         public static String DRAW_ID = "1063888";
@@ -170,6 +181,9 @@ public class Id {
     public static class QiMingId{
         // 激励视频：启明未提供公共测试广告位，需在启明后台创建后传入
         public static String REWARD_ID = "";
+        // 插屏 / Banner：启明未提供公共测试广告位，需在启明后台创建后传入
+        public static String INTER_ID = "";
+        public static String BANNER_ID = "";
     }
 
     
@@ -190,6 +204,9 @@ public class Id {
         public static String EFEED_ID = "8126"; //模板-信息流
         public static String NSPLASH_ID = "829117613"; //媒体渲染-开屏
         public static String NFEED_ID = "829118588"; //媒体渲染-信息流
+        // 插屏 / Banner：京东未提供公共测试广告位，需在京东后台创建后传入
+        public static String INTER_ID = "";
+        public static String BANNER_ID = "";
     }
     
     public static class TanxId{
@@ -206,6 +223,8 @@ public class Id {
         // 以下为 InMobi 官方文档中长期开放、可反复联调的测试广告位
         public static long INTER_ID = 1469137441636L;
         public static long REWARD_ID = 1453753057988L;
+        // Banner：InMobi 未提供公共测试横幅位，0 表示未配置，需在 InMobi 后台创建后传入
+        public static long BANNER_ID = 0L;
     }
     
     public static class UmengId{
@@ -216,6 +235,9 @@ public class Id {
         public static String FEED_ID = "";
         // 激励视频：需在友盟后台创建广告位后传入
         public static String REWARD_ID = "";
+        // 插屏 / Banner：需在友盟后台创建广告位后传入
+        public static String INTER_ID = "";
+        public static String BANNER_ID = "";
     }
     
     public static class SinaId{
@@ -223,5 +245,20 @@ public class Id {
         // 上线前务必替换为自己在新浪移动联盟后台申请的 appkey 与广告位
         public static String APP_KEY = "222b1a9c9d3848a7bd22252970ef2ffdb5b52";
         public static String APP_RID = "2";
+    }
+
+    public static class QiYiId{
+        // 以下为爱奇艺联盟官方 Demo（iadsdk V2.5.001）中给出的示例 AppId 与广告位，
+        // 上线前务必替换为自己在爱奇艺联盟后台申请的 AppId 与广告位
+        public static String APP_ID = "1791690200022404";
+        // OAID：SDK 初始化时必传，否则严重影响广告转化效果；
+        // 使用方可通过 setOaid 注入自己获取到的 OAID（本工程未内置 OAID SDK 采集）
+        public static String OAID = "";
+        public static String SPLASH_ID = "1628916542140418";
+        // 信息流与 Banner 同为模板渲染的 Banner 广告位，官方 Demo 只给了一个测试位
+        public static String FEED_ID = "1687677506331905";
+        public static String BANNER_ID = "1687677506331905";
+        public static String INTER_ID = "1743752274489731";
+        public static String REWARD_ID = "1650514407552135";
     }
 }

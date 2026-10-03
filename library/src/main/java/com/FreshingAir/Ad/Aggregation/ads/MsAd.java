@@ -1,5 +1,5 @@
 package com.FreshingAir.Ad.Aggregation.ads;
-import bin.mt.annotations.MTProtector;
+
 import androidx.annotation.Keep;
 import android.app.Activity;
 import android.util.Log;
@@ -7,7 +7,9 @@ import android.content.Context;
 import android.view.ViewGroup;
 
 import com.FreshingAir.Ad.Aggregation.AdPlatform;
+import com.FreshingAir.Ad.Aggregation.BannerAdCallback;
 import com.FreshingAir.Ad.Aggregation.Init;
+import com.FreshingAir.Ad.Aggregation.InterstitialAdCallback;
 import com.FreshingAir.Ad.Aggregation.RewardVideoAdCallback;
 import com.meishu.sdk.core.AdSdk;
 import com.meishu.sdk.core.MSAdConfig;
@@ -52,7 +54,7 @@ import com.meishu.sdk.core.ad.recycler.RecyclerMixAdEventLoader;
 import com.meishu.sdk.core.ad.fullscreenvideo.FullScreenVideoEventAdLoader;
 
 import com.meishu.sdk.core.ad.paster.PasterAdEventLoader;
-@MTProtector
+
 public class MsAd {
 
     private static final String TAG = "美数广告 SDK";
@@ -83,7 +85,7 @@ public class MsAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdExposure() {
                         SplashAdCallback.onSplashAdLoaded(context, adContainer);
                     }
@@ -98,7 +100,7 @@ public class MsAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onLoadFail(AdError adError) {
                 Log.e(TAG,"广告加载失败，错误信息："+adError.getMessage()+"("+adError.getCode()+")");
                 SplashAdCallback.goToMainActivity(context);
@@ -110,7 +112,7 @@ public class MsAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdFail(ISplashAd iSplashAd, AdError adError, int i) {
                 Log.e(TAG,"广告渲染失败，错误信息："+adError.getMessage()+"("+adError.getCode()+")");
                 SplashAdCallback.goToMainActivity(context);
@@ -128,7 +130,7 @@ public class MsAd {
                         .setIsHideSkipBtn(false)
                 ), new RecyclerAdLoadListener() {
             @Override
-            @MTProtector
+            
             public void onLoadedSuccess(List<RecyclerAdData> list) {
                 Log.i("美数广告","广告加载成功");
                 RecyclerAdData recyclerAdData = list.get(0);
@@ -139,13 +141,13 @@ public class MsAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdExposure() {
 
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdClosed() {
 
                     }
@@ -170,7 +172,18 @@ public class MsAd {
             }
         }).loadAd();
     }
+    /**
+     * 加载并展示美数 Banner 广告。
+     *
+     * @param activity        展示广告的页面
+     * @param pid             Banner 广告位 ID
+     * @param bannerContainer 承载广告 View 的容器
+     */
     public static void MsBannerAd(Activity activity, String pid, @NonNull ViewGroup bannerContainer){
+        if (activity == null || bannerContainer == null || pid == null || pid.trim().isEmpty()) {
+            BannerAdCallback.onBannerAdError(activity, -1, "参数非法（Activity/容器/广告位不能为空）");
+            return;
+        }
         bannerContainer.removeAllViews();
         new BannerAdEventLoader(activity,
                 new MsAdSlot.Builder()
@@ -183,35 +196,65 @@ public class MsAd {
                 new BannerAdLoadListener() {
             @Override
             public void onLoadSuccess(IBannerAd ad) {
-                Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                Log.i(TAG, "Banner广告加载成功");
+                ad.setInteractionListener(new InteractionListener() {
+                    @Override
+                    public void onAdClicked() {
+                        Log.i(TAG, "Banner广告被点击");
+                    }
+
+                    @Override
+                    
+                    public void onAdExposure() {
+                        Log.i(TAG, "Banner广告曝光");
+                    }
+
+                    @Override
+                    public void onAdClosed() {
+                        Log.i(TAG, "Banner广告关闭");
+                    }
+                });
                 ad.render();
                 ad.showAd(bannerContainer);
+                BannerAdCallback.onBannerAdLoaded(activity, bannerContainer);
             }
 
             @Override
-            @MTProtector
+            
             public void onLoadFail(AdError adError) {
-                Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                String msg = adError != null ? adError.getMessage() : null;
+                int code = adError != null ? adError.getCode() : 0;
+                Log.e(TAG, "Banner广告加载失败，错误信息：" + msg + "(" + code + ")");
+                BannerAdCallback.onBannerAdError(activity, code, msg);
             }
 
             @Override
             public void onRenderSuccess(IBannerAd ad) {
-                Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
-                //Toast.makeText(activity.getApplicationContext(),"渲染成功",Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "Banner广告渲染成功");
             }
 
             @Override
-            @MTProtector
+            
             public void onAdFail(IBannerAd ad, AdError adError, int type) {
-                Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                String msg = adError != null ? adError.getMessage() : null;
+                int code = adError != null ? adError.getCode() : 0;
+                Log.e(TAG, "Banner广告失败，错误信息：" + msg + "(" + type + ")");
+                BannerAdCallback.onBannerAdError(activity, code != 0 ? code : type, msg);
             }
         }).loadAd();
     }
-    @MTProtector
+
+    /**
+     * 加载并展示美数 Banner 广告（广告位为 long 时的便捷重载）。
+     */
+    public static void MsBannerAd(Activity activity, long pid, @NonNull ViewGroup bannerContainer){
+        MsBannerAd(activity, String.valueOf(pid), bannerContainer);
+    }
+    
     public static void MsFullScreenVideoAd(Activity activity, String pid){
         new FullScreenVideoEventAdLoader(activity, new MsAdSlot.Builder().setPid(pid).build(), new FullScreenAdLoadListener() {
             @Override
-            @MTProtector
+            
             public void onLoadSuccess(IFullScreenVideoAd ad) {
                 Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
             }
@@ -226,7 +269,7 @@ public class MsAd {
                 Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                 fullScreenVideoAd.setInteractionListener(new InteractionListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onAdClicked() {
                         Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                     }
@@ -265,7 +308,7 @@ public class MsAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoCompleted() {
                         Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                     }
@@ -295,13 +338,13 @@ public class MsAd {
                 .build();
         PasterAdEventLoader pasterAdLoader = new PasterAdEventLoader(context, videoContainer, msAdSlot, new PasterAdLoadListener() {
             @Override
-            @MTProtector
+            
             public void onVideoLoaded() {
 
             }
 
             @Override
-            @MTProtector
+            
             public void onVideoComplete() {
                 //videoView.start();
             }
@@ -310,7 +353,7 @@ public class MsAd {
             public void onLoadSuccess(PasterAd pasterAd) {
                 pasterAd.setInteractionListener(new InteractionListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onAdClicked() {
                         // 点击时可以把广告关掉
                         Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
@@ -322,7 +365,7 @@ public class MsAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdClosed() {
                         Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                         videoView.start();
@@ -337,13 +380,13 @@ public class MsAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onRenderSuccess(PasterAd pasterAd) {
 
             }
 
             @Override
-            @MTProtector
+            
             public void onAdFail(PasterAd pasterAd, AdError adError, int i) {
                 videoView.start();
             }
@@ -364,7 +407,7 @@ public class MsAd {
                 RewardVideoAdCallback.onRewardAdLoaded(activity);
                 ad.setInteractionListener(new RewardInteractionListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onReward(Map<String, Object> map) {
                         Log.i(TAG, "激励视频发放奖励");
                         RewardVideoAdCallback.onRewardAdRewarded(activity, null, 0);
@@ -375,14 +418,14 @@ public class MsAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdExposure() {
                         Log.i(TAG, "激励视频开始播放");
                         RewardVideoAdCallback.onRewardAdShow(activity);
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdClosed() {
                         Log.i(TAG, "激励视频关闭");
                         RewardVideoAdCallback.onRewardAdClose(activity);
@@ -391,7 +434,7 @@ public class MsAd {
                 });
                 ad.setMediaListener(new RewardAdMediaListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onVideoLoaded() {
                     }
 
@@ -404,12 +447,12 @@ public class MsAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoResume() {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onVideoCompleted() {
                     }
 
@@ -426,7 +469,7 @@ public class MsAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onLoadFail(AdError adError) {
                 String msg = adError != null ? adError.getMessage() : null;
                 Log.e(TAG, "激励视频加载失败，错误信息：" + msg);
@@ -440,7 +483,7 @@ public class MsAd {
             }
 
             @Override
-            @MTProtector
+            
             public void onAdFail(RewardVideoAd ad, AdError adError, int type) {
                 String msg = adError != null ? adError.getMessage() : null;
                 Log.e(TAG, "激励视频失败，错误信息：" + msg + "(" + type + ")");
@@ -448,8 +491,18 @@ public class MsAd {
             }
         }).loadAd();
     }
-    @MTProtector
+    /**
+     * 加载并展示美数插屏广告（加载成功后自动展示）。
+     *
+     * @param activity 展示广告的页面
+     * @param pid      插屏广告位 ID
+     */
+    
     public static void MsInterstitialAd(Activity activity, String pid){
+        if (activity == null || pid == null || pid.trim().isEmpty()) {
+            InterstitialAdCallback.onInterstitialAdError(activity, -1, "参数非法（Activity/广告位不能为空）");
+            return;
+        }
         new InterstitialAdEventLoader(activity,
                 new MsAdSlot.Builder()
                         .setPid(pid)
@@ -458,42 +511,62 @@ public class MsAd {
                 new InterstitialAdLoadListener() {
                     @Override
                     public void onLoadSuccess(InterstitialAd ad) {
-                        Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                        Log.i(TAG, "插屏广告加载成功");
+                        InterstitialAdCallback.onInterstitialAdLoaded(activity);
                         ad.setInteractionListener(new InteractionListener() {
                             @Override
                             public void onAdClicked() {
-                                Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                                Log.i(TAG, "插屏广告被点击");
                             }
 
                             @Override
                             public void onAdExposure() {
-                                Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()) + " " + "ecpm=" + ad.getData().getEcpm());
+                                Log.i(TAG, "插屏广告展示");
+                                InterstitialAdCallback.onInterstitialAdShow(activity);
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void onAdClosed() {
-                                Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                                Log.i(TAG, "插屏广告关闭");
+                                InterstitialAdCallback.onInterstitialAdClose(activity);
                             }
                         });
+                        // 美数插屏需要先渲染，渲染成功后再展示
+                        ad.render();
                     }
 
                     @Override
+                    
                     public void onLoadFail(AdError adError) {
-                        Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                        String msg = adError != null ? adError.getMessage() : null;
+                        int code = adError != null ? adError.getCode() : 0;
+                        Log.e(TAG, "插屏广告加载失败，错误信息：" + msg + "(" + code + ")");
+                        InterstitialAdCallback.onInterstitialAdError(activity, code, msg);
                     }
 
                     @Override
                     public void onRenderSuccess(InterstitialAd ad) {
-                        Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                        Log.i(TAG, "插屏广告渲染成功");
+                        ad.showAd(activity);
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onAdFail(InterstitialAd ad, AdError adError, int type) {
-                        Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
+                        String msg = adError != null ? adError.getMessage() : null;
+                        int code = adError != null ? adError.getCode() : 0;
+                        Log.e(TAG, "插屏广告失败，错误信息：" + msg + "(" + type + ")");
+                        InterstitialAdCallback.onInterstitialAdError(activity, code != 0 ? code : type, msg);
                     }
-                });
+                }).loadAd();
+    }
+
+    /**
+     * 加载并展示美数插屏广告（广告位为 long 时的便捷重载）。
+     */
+    public static void MsInterstitialAd(Activity activity, long pid){
+        MsInterstitialAd(activity, String.valueOf(pid));
     }
     public static void MsDrawAd(Context context, String pid, ViewGroup adContainer){
         new DrawAdEventLoader(context,
@@ -503,7 +576,7 @@ public class MsAd {
                         .build(),
                 new DrawAdLoadListener() {
                     @Override
-                    @MTProtector
+                    
                     public void onLoadSuccess(IDrawAd ad) {
                         Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                         adContainer.addView(ad.getAdView());
@@ -515,26 +588,26 @@ public class MsAd {
                     }
 
                     @Override
-                    @MTProtector
+                    
                     public void onRenderSuccess(IDrawAd iDrawAd) {
                         Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                         //Toast.makeText(VideoFeedActivity.this, "渲染成功", Toast.LENGTH_SHORT).show();
 
                         iDrawAd.setInteractionListener(new InteractionListener() {
                             @Override
-                            @MTProtector
+                            
                             public void onAdClicked() {
                                 Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void onAdExposure() {
                                 Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void onAdClosed() {
                                 Log.d(TAG, "DEMO ADEVENT " + (new Throwable().getStackTrace()[0].getMethodName()));
                             }
@@ -542,7 +615,7 @@ public class MsAd {
 
                         iDrawAd.setOnDrawVideoListener(new DrawAd.IDrawVideoListener() {
                             @Override
-                            @MTProtector
+                            
                             public void playRenderingStart() {
                                 Log.e(TAG, "playRenderingStart: " );
                             }
@@ -553,13 +626,13 @@ public class MsAd {
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void playResume() {
                                 Log.e(TAG, "playResume: " );
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void playCompletion() {
                                 Log.e(TAG, "playCompletion: " );
                             }
@@ -570,7 +643,7 @@ public class MsAd {
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void pauseBtnClick() {
                                 Log.e(TAG, "pauseBtnClick: " );
                             }
@@ -591,7 +664,7 @@ public class MsAd {
                             }
 
                             @Override
-                            @MTProtector
+                            
                             public void onVideoError(int errorCode, String errorMsg) {
                                 Log.e(TAG, "onVideoError: "+errorCode );
                             }

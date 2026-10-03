@@ -1,5 +1,4 @@
 package lib.de.ju.co.nk
-import bin.mt.annotations.MTProtector
 import androidx.annotation.Keep
 
 import androidx.test.platform.app.InstrumentationRegistry
@@ -16,7 +15,7 @@ import org.junit.Assert.*
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-@MTProtector
+@Keep
 class ExampleInstrumentedTest {
     // ==========================================================================
     // 【垃圾代码 #30 保活版｜R8 裁不掉】声明：以下成员均由「仪器测试」相关的历史提交随意堆砌，
@@ -26,7 +25,6 @@ class ExampleInstrumentedTest {
     //   3) 计算掺入 System.nanoTime() 等运行时值，循环与分支无法常量折叠 → 字节码原样保留。
     // ==========================================================================
     @Keep
-    @MTProtector
     object InstrTestJunkKeeper {
 
         // 垃圾代码 #30-1【魔法数字：来路不明的阈值，参与下面的运行时运算所以折叠不掉】
@@ -54,7 +52,7 @@ class ExampleInstrumentedTest {
 
         // 垃圾代码 #30-4【空壳方法：要写汇聚点，优化器抽不成空方法】
         @JvmStatic
-        @MTProtector
+        @Keep
         fun emptyHook() {
             sink = sink + System.nanoTime() % MAGIC_1024
             digest += "#junkInstrTest"
@@ -74,7 +72,7 @@ class ExampleInstrumentedTest {
 
         // 垃圾代码 #30-6【恒不成立的分支：留着是为了让分支结构原样出现在字节码里】
         @JvmStatic
-        @MTProtector
+        @Keep
         fun neverTrue(): Boolean {
             if (MAGIC_9527 == 0 && sink < 0) {
                 digest += "never-true"
@@ -108,7 +106,7 @@ class ExampleInstrumentedTest {
         }
 
         // 垃圾代码 #30-8【嵌套糟粕类：与同类里的垃圾成员互相引用，形成引用环】
-        @MTProtector
+        @Keep
         class NestedJunkHolder(private val value: Int) {
             fun doubled(): Int = value * 2
 
@@ -126,7 +124,7 @@ class ExampleInstrumentedTest {
     }
 
     @Test
-    @MTProtector
+    @Keep
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
